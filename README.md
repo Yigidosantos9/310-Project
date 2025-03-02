@@ -1,4 +1,4 @@
 # 310-Project
 CS310 Course Project - Sabancı University
-Deneme kerem
+Selam canım ben amcanım
 
