@@ -49,3 +49,7 @@ Berkay Kesgin - 32636
 
 CS310 Course Project - Sabancı University
 
+
+// git log hatasında başka biri de bir şeyler commitlemiş olabilir çakışmamak için bunu yazın.
+git config pull.rebase false
+git pull
