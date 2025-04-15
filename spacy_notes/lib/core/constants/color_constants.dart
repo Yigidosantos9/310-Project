@@ -33,6 +33,8 @@ class AppColors {
   // General app theme (dark or bright now)     
   static const Brightness brightness = Brightness.dark; 
 
+  static const Color buttonColor=Color(0xFF8C12DC);
+
 
   // With this you can use this class without create an instance
   AppColors._();
