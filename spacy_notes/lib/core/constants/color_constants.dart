@@ -41,6 +41,7 @@ class AppColors {
   static const Color unselectedTaskColor=Color(0xFF8C898E);
 
   static const Color mainTextColor=Color(0xFFFFFFFF);
+  static const Color grayTextColor=Color(0xFFD9D9D9);
   static const Color darkSubTextColor=Color(0xFF5A5A5A);
   static const Color lightSubTextColor=Color(0xFFC4C4C4);
 
