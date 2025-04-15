@@ -33,6 +33,7 @@ class AppColors {
 
   // General colors for the app
   static const Color mainButtonColor = Color(0xFF8C12DC);
+  static const Color darkPurpleColor = Color(0x808C12DC);
   static const Color secondaryButtonColor = Color(0xFFC4C4C4);
   static const Color iconColor = Color(0xFFf19ddc);
   static const Color selectedTaskColor = Color(0xFFD9D9D9);
