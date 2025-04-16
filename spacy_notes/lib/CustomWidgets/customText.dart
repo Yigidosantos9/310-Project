@@ -35,7 +35,7 @@ class CustomText extends StatelessWidget {
       ),
       textAlign: textAlign,
       maxLines: maxLines,
-      overflow: overflow,
+      overflow: maxLines != null ? overflow : null,
     );
   }
 }

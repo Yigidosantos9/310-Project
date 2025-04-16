@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/splash',
+      initialRoute: '/detailedTeam',
       title: 'spacy_notes',
       theme: ThemeData(
 
@@ -61,6 +61,7 @@ class MyApp extends StatelessWidget {
         '/teamName': (context) => const TeamNamePage(),
         '/teams': (context) => const TeamsPage(),
         '/pomodoro': (context) => const PomodoroPage(),
+        '/detailedTeam': (context) => const TeamNamePage(),
       },
     );
   }
