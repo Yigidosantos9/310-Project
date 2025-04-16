@@ -62,6 +62,7 @@ class MyApp extends StatelessWidget {
         '/teamName': (context) => const TeamNamePage(),
         '/teams': (context) => const TeamsPage(),
         '/pomodoro': (context) => const PomodoroPage(),
+        '/detailedTeam': (context) => const TeamNamePage(),
         '/market': (context) => const MarketPage()
       },
     );
