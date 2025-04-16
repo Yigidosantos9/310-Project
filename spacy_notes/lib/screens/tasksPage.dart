@@ -10,9 +10,54 @@ class TasksPage extends StatefulWidget {
   State<TasksPage> createState() => _TasksPageState();
 }
 
+class Task {
+  String title;
+  String description;
+  bool isCompleted;
+
+  Task({
+    required this.title,
+    required this.description,
+    this.isCompleted = false,
+  });
+}
+
 class _TasksPageState extends State<TasksPage> {
-  // Başlangıçta 6 görev var
-  List<bool> taskStatus = [false, false, false, true, true, true];
+  List<Task> tasks = [
+    Task(
+      title: 'Complete CS300 homework',
+      description:
+          'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+    ),
+    Task(
+      title: 'Complete CS300 homework',
+      description:
+          'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+    ),
+    Task(
+      title: 'Complete CS300 homework',
+      description:
+          'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+    ),
+    Task(
+      title: 'Complete CS300 homework',
+      description:
+          'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+      isCompleted: true,
+    ),
+    Task(
+      title: 'Complete CS300 homework',
+      description:
+          'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+      isCompleted: true,
+    ),
+    Task(
+      title: 'Complete CS300 homework',
+      description:
+          'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+      isCompleted: true,
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -21,13 +66,18 @@ class _TasksPageState extends State<TasksPage> {
       appBar: const CustomAppBar(title: 'GROUP TASKS'),
       body: ListView.builder(
         padding: const EdgeInsets.only(top: 0, left: 20, right: 20, bottom: 20),
-        itemCount: taskStatus.length,
+        itemCount: tasks.length,
         itemBuilder: (context, index) {
           return TaskCard(
-            isCompleted: taskStatus[index],
-            onTapIcon: () {
+            task: tasks[index],
+            onToggleCompleted: () {
               setState(() {
-                taskStatus[index] = !taskStatus[index];
+                tasks[index].isCompleted = !tasks[index].isCompleted;
+              });
+            },
+            onDelete: () {
+              setState(() {
+                tasks.removeAt(index);
               });
             },
           );
@@ -41,8 +91,7 @@ class _TasksPageState extends State<TasksPage> {
           shape: const CircleBorder(),
           onPressed: () {
             setState(() {
-              // taskStatus.insert(0, false); // if you want to add the new task to the beginning
-              taskStatus.add(false); // adding the new task to the end
+              tasks.add(Task(title: '', description: ''));
             });
           },
           child: const Icon(Icons.add, size: 36, color: Colors.white),
@@ -53,56 +102,91 @@ class _TasksPageState extends State<TasksPage> {
 }
 
 class TaskCard extends StatelessWidget {
-  final bool isCompleted;
-  final VoidCallback onTapIcon;
+  final Task task;
+  final VoidCallback onToggleCompleted;
+  final VoidCallback onDelete;
 
   const TaskCard({
     super.key,
-    required this.isCompleted,
-    required this.onTapIcon,
+    required this.task,
+    required this.onToggleCompleted,
+    required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
+    final titleController = TextEditingController(text: task.title);
+    final descController = TextEditingController(text: task.description);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
       decoration: BoxDecoration(
-        color: isCompleted ? AppColors.selectedTaskColor : Colors.white,
+        color: task.isCompleted ? AppColors.selectedTaskColor : Colors.white,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          GestureDetector(
-            onTap: onTapIcon,
-            child: Icon(
-              isCompleted
-                  ? Icons.check_circle_rounded
-                  : Icons.radio_button_unchecked,
-              size: 50,
-              color: AppColors.mainButtonColor,
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: onToggleCompleted,
+                child: Icon(
+                  task.isCompleted
+                      ? Icons.check_circle_rounded
+                      : Icons.radio_button_unchecked,
+                  size: 50,
+                  color: AppColors.mainButtonColor,
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: titleController,
+                      onChanged: (val) => task.title = val,
+                      style: const TextStyle(
+                        fontSize: 23,
+                        color: Colors.black,
+                        fontFamily: 'Jersey',
+                      ),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Enter task title',
+                      ),
+                    ),
+                    TextField(
+                      controller: descController,
+                      onChanged: (val) => task.description = val,
+                      maxLines: null,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontFamily: 'Jersey',
+                        color: AppColors.darkSubTextColor,
+                      ),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Enter task description',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                CustomText(
-                  text: 'Complete CS300 homework',
-                  fontSize: 23,
-                  color: Colors.black,
-                ),
-                SizedBox(height: 4),
-                CustomText(
-                  text:
-                      'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the',
-                  fontSize: 20,
-                  color: AppColors.darkSubTextColor,
-                  maxLines: 3,
-                ),
-              ],
+          Positioned(
+            top: 0,
+            right: 0,
+            child: GestureDetector(
+              onTap: onDelete,
+              child: const Icon(
+                Icons.delete,
+                size: 24,
+                color: AppColors.iconColor,
+              ),
             ),
           ),
         ],

@@ -15,6 +15,11 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
   bool canChangeIcon = true;
   bool canChangeDescName = true;
 
+  final TextEditingController _teamNameController =
+      TextEditingController(); // boş
+  final TextEditingController _teamDescController =
+      TextEditingController(); // boş
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +52,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                                 child: const Icon(
                                   Icons.public,
                                   size: 72,
-                                  color: AppColors.iconColor,
+                                  color: AppColors.mainButtonColor,
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -62,35 +67,58 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const [
-                                CustomText(
+                              children: [
+                                const CustomText(
                                   text: "Team Name :",
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.grayTextColor,
                                 ),
-                                CustomText(
-                                  text: "Lagaluga",
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.lightSubTextColor,
+                                TextField(
+                                  controller: _teamNameController,
+                                  cursorColor: AppColors.mainButtonColor,
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.lightSubTextColor,
+                                    fontFamily: 'Jersey',
+                                  ),
+                                  decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: "Enter your team name",
+                                    hintStyle: TextStyle(
+                                      fontSize: 20,
+                                      fontFamily: 'Jersey',
+                                      color: AppColors.darkSubTextColor,
+                                    ),
+                                  ),
                                 ),
-                                SizedBox(height: 16),
-                                CustomText(
+                                const SizedBox(height: 16),
+                                const CustomText(
                                   text: "Team Description :",
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.grayTextColor,
                                 ),
-                                SizedBox(height: 6),
-                                Text(
-                                  "Our team is supposed to be the best one. However, our StarPoint is not enough to buy Buzz LightYear icon.",
-                                  style: TextStyle(
-                                    color: AppColors.lightSubTextColor,
+                                TextField(
+                                  controller: _teamDescController,
+                                  cursorColor: AppColors.mainButtonColor,
+                                  maxLines: null,
+                                  style: const TextStyle(
                                     fontSize: 18,
                                     fontFamily: 'Jersey',
+                                    color: AppColors.lightSubTextColor,
                                   ),
-                                  softWrap: true,
+                                  decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText:
+                                        "Enter a description of your team",
+                                    hintStyle: TextStyle(
+                                      fontSize: 18,
+                                      fontFamily: 'Jersey',
+                                      color: AppColors.darkSubTextColor,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -107,13 +135,13 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: AppColors.darkPurpleColor,
+                          color: AppColors.selectedTaskColor,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const CustomText(
                           text: "- 32693 -",
                           fontSize: 26,
-                          color: AppColors.mainTextColor,
+                          color: AppColors.darkSubTextColor,
                         ),
                       ),
 
@@ -134,25 +162,26 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                       _buildToggleRow(
                         "Group members can change the icon",
                         canChangeIcon,
-                        (val) {
-                          setState(() => canChangeIcon = val);
-                        },
+                        (val) => setState(() => canChangeIcon = val),
                       ),
                       _buildToggleRow(
                         "Group members can change the\ndescription and the name",
                         canChangeDescName,
-                        (val) {
-                          setState(() => canChangeDescName = val);
-                        },
+                        (val) => setState(() => canChangeDescName = val),
                       ),
+
                       const SizedBox(height: 15),
+
                       // Create Team Button
                       SizedBox(
                         width: double.infinity,
                         height: 100,
                         child: ElevatedButton(
                           onPressed: () {
-                            print("Create Team tapped");
+                            print("Team Name: ${_teamNameController.text}");
+                            print(
+                              "Team Description: ${_teamDescController.text}",
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.mainButtonColor,
@@ -189,14 +218,14 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
               height: 50,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: AppColors.darkPurpleColor,
+                color: AppColors.selectedTaskColor,
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Center(
                 child: CustomText(
                   text: label,
                   fontSize: 17,
-                  color: AppColors.mainTextColor,
+                  color: AppColors.darkSubTextColor,
                   textAlign: TextAlign.center,
                 ),
               ),
