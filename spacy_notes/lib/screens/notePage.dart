@@ -137,9 +137,9 @@ class NotePage extends StatelessWidget {
                             ),
                           ),
                           onPressed: () {
-                            Navigator.of(context).pushNamed('/joinTeam');
+                            Navigator.of(context).popUntil(ModalRoute.withName('/profile'));
                           },
-                          child: const CustomText(text: "Join Team", fontSize: 18,color: AppColors.mainTextColor),
+                          child: const CustomText(text: "Cancel", fontSize: 18,color: AppColors.mainTextColor),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -153,9 +153,9 @@ class NotePage extends StatelessWidget {
                             ),
                           ),
                           onPressed: () {
-                            Navigator.of(context).pushNamed('/createTeam');
+                            Navigator.of(context).popUntil(ModalRoute.withName('/profile')); // Then we will save in real
                           },
-                          child: const CustomText(text: "Create Team", fontSize: 18,color: AppColors.mainTextColor),
+                          child: const CustomText(text: "Save", fontSize: 18,color: AppColors.mainTextColor),
                         ),
                       ),
                     ],

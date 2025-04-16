@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/detailedTeam',
+      initialRoute: '/splash',
       title: 'spacy_notes',
       theme: ThemeData(
 
