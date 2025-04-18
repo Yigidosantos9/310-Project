@@ -201,7 +201,7 @@ class PlanetWidget extends StatelessWidget {
             ),
             child: TextButton(
               onPressed: () {
-                // You can add actions on tap here
+                Navigator.pushNamed(context, "/notes");
               },
               child: FittedBox(
                 child: CustomText(text: inputText, fontSize: 37),

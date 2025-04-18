@@ -38,7 +38,7 @@ class ProfilePage extends StatelessWidget {
         onTap: (index) {
           switch (index) {
             case 0:
-              Navigator.pushNamed(context, '/notes');
+              Navigator.pushNamed(context, '/groups');
               break;
             case 1:
               Navigator.pushNamed(context, '/note');
