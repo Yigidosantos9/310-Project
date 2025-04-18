@@ -29,16 +29,16 @@ class _SplashPageState extends State<SplashPage> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    // Genişlik ve yükseklik oranlarını hesapla
+   
     final widthScale = (screenWidth / 500).clamp(0.6, 1.0).toDouble();
     final heightScale = (screenHeight / 800).clamp(0.6, 1.0).toDouble();
 
-    // En küçük oranı al: hem taşmayı engeller hem orantılı küçültür
+
     final finalScale = widthScale < heightScale ? widthScale : heightScale;
 
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: AppColors.primary,
         body: Center(
           child: Transform.scale(
             scale: finalScale,
@@ -47,22 +47,22 @@ class _SplashPageState extends State<SplashPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    'assets/images/logo.png',
-                    width: 300,
-                  ),
+                  Image.asset('assets/images/logo.png', width: 300),
                   const SizedBox(height: 20),
                   const CustomText(
-                      text: "SPACY NOTES",
-                      fontSize: 40,
-                      color: AppColors.mainTextColor),
+                    text: "SPACY NOTES",
+                    fontSize: 40,
+                    color: AppColors.mainTextColor,
+                  ),
                   const SizedBox(height: 80),
                   const SizedBox(
                     width: 80,
                     height: 80,
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      strokeWidth: 6,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.mainTextColor,
+                      ),
+                      strokeWidth: 8,
                     ),
                   ),
                 ],

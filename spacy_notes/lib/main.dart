@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spacy_notes/core/constants/color_constants.dart';
+import 'package:spacy_notes/screens/market_page.dart';
 
 // Splash & Auth
 import 'screens/splashPage.dart';
@@ -61,6 +62,8 @@ class MyApp extends StatelessWidget {
         '/teamName': (context) => const TeamNamePage(),
         '/teams': (context) => const TeamsPage(),
         '/pomodoro': (context) => const PomodoroPage(),
+        '/detailedTeam': (context) => const TeamNamePage(),
+        '/market': (context) => const MarketPage()
       },
     );
   }
