@@ -12,7 +12,8 @@ class NotePage extends StatelessWidget {
     return SafeArea(
       child: Scaffold(
         appBar: const CustomAppBar(
-          title: "Note Page",
+          title: "Note",
+          subTitle: "Page",
           rhs: Padding(
             padding: EdgeInsets.only(right: 8.0),
             child: PopUpFolderMenu(),

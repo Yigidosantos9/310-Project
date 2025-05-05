@@ -18,7 +18,7 @@ class AppColors {
   static const Color onSecondary = Colors.white;
 
   // General background color
-  static const Color background = Color(0xFF0C0C0C);
+  static const Color background = Color(0xFF060B36);
 
   // General error colors
   static const Color error = Colors.redAccent;
@@ -33,6 +33,7 @@ class AppColors {
 
   // General colors for the app
   static const Color mainButtonColor = Color(0xFF8C12DC);
+  static const Color darkPurpleColor = Color(0x808C12DC);
   static const Color secondaryButtonColor = Color(0xFFC4C4C4);
   static const Color iconColor = Color(0xFFf19ddc);
   static const Color selectedTaskColor = Color(0xFFD9D9D9);
@@ -42,6 +43,8 @@ class AppColors {
   static const Color grayTextColor = Color(0xFFD9D9D9);
   static const Color darkSubTextColor = Color(0xFF5A5A5A);
   static const Color lightSubTextColor = Color(0xFFC4C4C4);
+
+  static const Color appBarColor = Color.fromARGB(255, 17, 1, 37);
 
   static const Color lightGrayBackgroundColor = Color(0xFFF3F3F3);
   // With this you can use this class without create an instance
