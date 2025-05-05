@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:spacy_notes/CustomWidgets/customAppBar.dart';
 import 'package:spacy_notes/CustomWidgets/customText.dart';

@@ -1,104 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:spacy_notes/providers/market_providers/market_data_provider.dart';
 import 'package:spacy_notes/widgets/market_widgets/cut_corner_color_card.dart';
 import 'package:spacy_notes/widgets/market_widgets/planet_card_widget.dart';
 import 'package:spacy_notes/widgets/market_widgets/profile_picture_card.dart';
 
-class MarketPage extends StatefulWidget {
+class MarketPage extends ConsumerStatefulWidget {
   const MarketPage({super.key});
 
   @override
-  State<MarketPage> createState() => _MarketPageState();
+  ConsumerState<MarketPage> createState() => _MarketPageState();
 }
 
-class _MarketPageState extends State<MarketPage> {
+class _MarketPageState extends ConsumerState<MarketPage> {
   int coinAmount = 42;
 
-  // Güncellenmiş gezegen listesi: her biri başlık, alt başlık, resim yolu ve fiyat içeriyor
-  final List<Map<String, String>> planets = [
-    {
-      "title": "Mercury",
-      "subTitle": "Closest to the Sun",
-      "imagePath": "assets/images/logo.png",
-      "price": "150",
-    },
-    {
-      "title": "Venus",
-      "subTitle": "The Morning Star",
-      "imagePath": "assets/images/logo.png",
-      "price": "200",
-    },
-    {
-      "title": "Earth",
-      "subTitle": "Blue Planet",
-      "imagePath": "assets/images/logo.png",
-      "price": "250",
-    },
-    {
-      "title": "Mars",
-      "subTitle": "Red Planet",
-      "imagePath": "assets/images/logo.png",
-      "price": "300",
-    },
-    {
-      "title": "Jupiter",
-      "subTitle": "Gas Giant",
-      "imagePath": "assets/images/logo.png",
-      "price": "350",
-    },
-    {
-      "title": "Saturn",
-      "subTitle": "Ringed Beauty",
-      "imagePath": "assets/images/logo.png",
-      "price": "400",
-    },
-  ];
-
-  // Profil listesi
-  final List<String> profiles = ["Alice", "Bob", "Charlie", "Dave"];
-
-  // Eskiden kullanılan colorPalettes listesi yerine, yeni kartların parametrelerini içeren liste:
-  final List<Map<String, dynamic>> paletteCards = [
-    {
-      "title": "Dusk Horizon",
-      "subTitle": "Prismatic",
-      "gradientColors": [const Color(0xFF3E2723), const Color(0xFF1B1B1B)],
-      "circleBorderColor": Colors.orange,
-      "circleFillColor": Colors.orange,
-    },
-    {
-      "title": "Neon Rider",
-      "subTitle": "Prismatic",
-      "gradientColors": [const Color(0xFF7E57C2), const Color(0xFF4527A0)],
-      "circleBorderColor": Colors.orangeAccent,
-      "circleFillColor": Colors.orangeAccent,
-    },
-    {
-      "title": "Neon Rider",
-      "subTitle": "Prismatic",
-      "gradientColors": [
-        const Color.fromARGB(255, 87, 194, 180),
-        const Color.fromARGB(255, 27, 105, 125),
-      ],
-      "circleBorderColor": Colors.orangeAccent,
-      "circleFillColor": Colors.orangeAccent,
-    },
-    {
-      "title": "Neon Rider",
-      "subTitle": "Prismatic",
-      "gradientColors": [const Color(0xFF7E57C2), const Color(0xFF4527A0)],
-      "circleBorderColor": Colors.orangeAccent,
-      "circleFillColor": Colors.orangeAccent,
-    },
-    {
-      "title": "Neon Rider",
-      "subTitle": "Prismatic",
-      "gradientColors": [const Color(0xFF7E57C2), const Color(0xFF4527A0)],
-      "circleBorderColor": Colors.orangeAccent,
-      "circleFillColor": Colors.orangeAccent,
-    },
-  ];
-
-  // Ek placeholder elemanlar
   final List<String> moreItems = [
     "Item 1",
     "Item 2",
@@ -109,6 +25,10 @@ class _MarketPageState extends State<MarketPage> {
 
   @override
   Widget build(BuildContext context) {
+    final planetsAsync = ref.watch(planetsProvider);
+    final profilesAsync = ref.watch(profilesProvider);
+    final palettesAsync = ref.watch(palettesProvider);
+
     return Scaffold(
       backgroundColor: const Color(0xFF060B36),
       appBar: AppBar(
@@ -118,13 +38,11 @@ class _MarketPageState extends State<MarketPage> {
           child: RichText(
             text: TextSpan(
               children: [
-                // 'Spacy ' kısmı gradient ile
                 WidgetSpan(
                   child: ShaderMask(
-                    shaderCallback:
-                        (bounds) => const LinearGradient(
-                          colors: [Color(0xFF5B2C6F), Color(0xFF9B59B6)],
-                        ).createShader(bounds),
+                    shaderCallback: (bounds) => const LinearGradient(
+                      colors: [Color(0xFF5B2C6F), Color(0xFF9B59B6)],
+                    ).createShader(bounds),
                     child: const Text(
                       'Spacy ',
                       style: TextStyle(
@@ -136,16 +54,11 @@ class _MarketPageState extends State<MarketPage> {
                     ),
                   ),
                 ),
-                // 'Store' kısmı da gradient veya beyaz olarak
                 WidgetSpan(
                   child: ShaderMask(
-                    shaderCallback:
-                        (bounds) => const LinearGradient(
-                          colors: [
-                            Color.fromARGB(255, 232, 229, 233),
-                            Color.fromARGB(255, 255, 255, 255),
-                          ],
-                        ).createShader(bounds),
+                    shaderCallback: (bounds) => const LinearGradient(
+                      colors: [Color.fromARGB(255, 232, 229, 233), Color.fromARGB(255, 255, 255, 255)],
+                    ).createShader(bounds),
                     child: const Text(
                       'Store',
                       style: TextStyle(
@@ -168,10 +81,7 @@ class _MarketPageState extends State<MarketPage> {
               children: [
                 const Icon(Icons.monetization_on, color: Colors.yellowAccent),
                 const SizedBox(width: 4),
-                Text(
-                  '$coinAmount',
-                  style: const TextStyle(color: Colors.white),
-                ),
+                Text('$coinAmount', style: const TextStyle(color: Colors.white)),
               ],
             ),
           ),
@@ -182,102 +92,85 @@ class _MarketPageState extends State<MarketPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Bölüm: Planets
-            const Text(
-              "Planets",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            const Text("Planets", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            SizedBox(
-              height: 250,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: planets.length,
-                itemBuilder: (context, index) {
-                  final planet = planets[index];
-                  return PlanetCard(
-                    title: planet["title"]!,
-                    subTitle: planet["subTitle"]!,
-                    imagePath: planet["imagePath"]!,
-                    price: planet["price"]!,
-                  );
-                },
+            planetsAsync.when(
+              data: (planets) => SizedBox(
+                height: 250,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: planets.length,
+                  itemBuilder: (context, index) {
+                    final p = planets[index];
+                    return PlanetCard(
+                      title: p.title,
+                      subTitle: p.subTitle,
+                      imagePath: p.imagePath,
+                      price: p.price,
+                    );
+                  },
+                ),
               ),
+              loading: () => const CircularProgressIndicator(),
+              error: (e, _) => Text('Error: $e', style: const TextStyle(color: Colors.red)),
             ),
+
             const SizedBox(height: 24),
-            // 2. Bölüm: Profile Pictures
-            const Text(
-              "Profile Pictures",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            const Text("Profile Pictures", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            SizedBox(
-              height: 200,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: profiles.length,
-                itemBuilder: (context, index) {
-                  return ProfilePictureCard(
-                    title: "Winter Serenity",
-                    imagePath: "assets/images/logo.png", // or a URL
-                    price: "500",
-                  );
-                },
+            profilesAsync.when(
+              data: (profiles) => SizedBox(
+                height: 200,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: profiles.length,
+                  itemBuilder: (context, index) {
+                    final profile = profiles[index];
+                    return ProfilePictureCard(
+                      title: profile.title,
+                      imagePath: profile.imagePath,
+                      price: profile.price,
+                    );
+                  },
+                ),
               ),
+              loading: () => const CircularProgressIndicator(),
+              error: (e, _) => Text('Error: $e', style: const TextStyle(color: Colors.red)),
             ),
+
             const SizedBox(height: 24),
-            // 3. Bölüm: Color Palettes (Eskiden kullanılan ColorPaletteCard yerine artık CutCornerColorCard kullanılıyor)
-            const Text(
-              "Color Palettes",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            const Text("Color Palettes", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            SizedBox(
-              height: 60,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: paletteCards.length,
-                itemBuilder: (context, index) {
-                  final palette = paletteCards[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 16),
-                    child: CutCornerColorCard(
-                      title: palette["title"],
-                      subTitle: palette["subTitle"],
-                      gradientColors: palette["gradientColors"],
-                      circleBorderColor: palette["circleBorderColor"],
-                      circleFillColor: palette["circleFillColor"],
-                      onInfoPressed: () {
-                        // Info ikonuna tıklandığında yapılacak aksiyon
-                        debugPrint("${palette["title"]} info tapped!");
-                      },
-                    ),
-                  );
-                },
+            palettesAsync.when(
+              data: (palettes) => SizedBox(
+                height: 60,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: palettes.length,
+                  itemBuilder: (context, index) {
+                    final palette = palettes[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: CutCornerColorCard(
+                        title: palette.title,
+                        subTitle: palette.subTitle,
+                        gradientColors: palette.gradientColors,
+                        circleBorderColor: palette.circleBorderColor,
+                        circleFillColor: palette.circleFillColor,
+                        onInfoPressed: () {
+                          debugPrint("${palette.title} info tapped!");
+                        },
+                      ),
+                    );
+                  },
+                ),
               ),
+              loading: () => const CircularProgressIndicator(),
+              error: (e, _) => Text('Error: $e', style: const TextStyle(color: Colors.red)),
             ),
+
             const SizedBox(height: 24),
-            // 4. Bölüm: More Items (Placeholder)
-            const Text(
-              "More Items",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            const Text("More Items", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             SizedBox(
               height: 150,
@@ -286,9 +179,7 @@ class _MarketPageState extends State<MarketPage> {
                 itemCount: moreItems.length,
                 itemBuilder: (context, index) {
                   return GestureDetector(
-                    onTap: () {
-                      // Gelecekte aksiyon eklenecek
-                    },
+                    onTap: () {},
                     child: Container(
                       width: 150,
                       margin: const EdgeInsets.only(right: 16),
@@ -313,4 +204,3 @@ class _MarketPageState extends State<MarketPage> {
     );
   }
 }
-

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:spacy_notes/core/constants/color_constants.dart';
 import 'package:spacy_notes/screens/market_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 
 // Splash & Auth
 import 'screens/splashPage.dart';
@@ -20,7 +22,7 @@ import 'screens/teamsPage.dart';
 import 'screens/pomodoroPage.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
