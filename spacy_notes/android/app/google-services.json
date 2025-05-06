@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "825880585012",
+    "project_id": "spacynotes",
+    "storage_bucket": "spacynotes.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:825880585012:android:75cfdc41af59b78d667b61",
+        "android_client_info": {
+          "package_name": "com.example.spacy_notes"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfQuHrOY7s9j1Dnfa-QrSuf--sYlAAeCQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

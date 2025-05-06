@@ -1,8 +1,9 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:spacy_notes/core/constants/color_constants.dart';
 import 'package:spacy_notes/screens/market_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 
 // Splash & Auth
 import 'screens/splashPage.dart';
@@ -21,7 +22,24 @@ import 'screens/detailedTeamPage.dart';
 import 'screens/teamsPage.dart';
 import 'screens/pomodoroPage.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (kIsWeb) {
+    await Firebase.initializeApp(
+      options: FirebaseOptions(
+        apiKey: "AIzaSyCTV94FNhfftqzcMFgsS6CyI-8dLBYlMtM",
+        authDomain: "spacynotes.firebaseapp.com",
+        projectId: "spacynotes",
+        storageBucket: "spacynotes.firebasestorage.app",
+        messagingSenderId: "825880585012",
+        appId: "1:825880585012:web:c6a954f7d817fff7667b61",
+        measurementId: "G-FC4LT924BE",
+      ),
+    );
+  } else {
+    await Firebase.initializeApp();
+  }
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -35,21 +53,22 @@ class MyApp extends StatelessWidget {
       initialRoute: '/splash',
       title: 'spacy_notes',
       theme: ThemeData(
-
-          // If you don't give a specific color these
-          // colors are asigned to your widget for their roles
-          primaryColor: AppColors.primary,
-          scaffoldBackgroundColor: AppColors.background,
-          colorScheme: ColorScheme(
-              brightness: AppColors.brightness,
-              primary: AppColors.primary,
-              onPrimary: AppColors.onPrimary,
-              secondary: AppColors.secondary,
-              onSecondary: AppColors.onSecondary,
-              error: AppColors.error,
-              onError: AppColors.onError,
-              surface: AppColors.surface,
-              onSurface: AppColors.onSurface)),
+        // If you don't give a specific color these
+        // colors are asigned to your widget for their roles
+        primaryColor: AppColors.primary,
+        scaffoldBackgroundColor: AppColors.background,
+        colorScheme: ColorScheme(
+          brightness: AppColors.brightness,
+          primary: AppColors.primary,
+          onPrimary: AppColors.onPrimary,
+          secondary: AppColors.secondary,
+          onSecondary: AppColors.onSecondary,
+          error: AppColors.error,
+          onError: AppColors.onError,
+          surface: AppColors.surface,
+          onSurface: AppColors.onSurface,
+        ),
+      ),
       routes: {
         '/splash': (context) => const SplashPage(),
         '/login': (context) => const LoginPage(),
@@ -65,7 +84,7 @@ class MyApp extends StatelessWidget {
         '/teams': (context) => const TeamsPage(),
         '/pomodoro': (context) => const PomodoroPage(),
         '/detailedTeam': (context) => const TeamNamePage(),
-        '/market': (context) => const MarketPage()
+        '/market': (context) => const MarketPage(),
       },
     );
   }

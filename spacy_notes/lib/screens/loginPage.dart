@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spacy_notes/CustomWidgets/customText.dart';
 import 'package:spacy_notes/core/constants/color_constants.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -22,23 +23,50 @@ class _LoginPageState extends State<LoginPage> {
   bool _passwordVisible = false;
   bool _confirmPasswordVisible = false;
 
-  void _handleAuth() {
+  void _handleAuth() async {
     if (_formKey.currentState!.validate()) {
+      final email = _emailController.text.trim();
+      final password = _passwordController.text.trim();
+      final username = _usernameController.text.trim();
+
       if (!isLoginSelected &&
-          _passwordController.text.trim() !=
-              _confirmPasswordController.text.trim()) {
+          password != _confirmPasswordController.text.trim()) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Passwords do not match!")),
         );
+        return;
       }
 
-      print(isLoginSelected ? "Login Pressed" : "Sign Up Pressed");
-      print("Email: ${_emailController.text}");
-      print("Password: ${_passwordController.text}");
-      if (!isLoginSelected) {
-        print("Username: ${_usernameController.text}");
+      try {
+        if (isLoginSelected) {
+          // 🔐 Login işlemi
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+            email: email,
+            password: password,
+          );
+          print("Login başarılı");
+        } else {
+          // 🆕 Sign up işlemi
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: email,
+            password: password,
+          );
+          print("Sign up başarılı");
+          // opsiyonel: username Firestore'a yazılabilir (istersen sonra ekleyelim)
+        }
+
+        Navigator.pushNamed(context, '/profile');
+      } on FirebaseAuthException catch (e) {
+        print("Firebase hatası: ${e.message}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? "Something went wrong")),
+        );
+      } catch (e) {
+        print("Genel hata: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("An unexpected error occurred")),
+        );
       }
-      Navigator.pushNamed(context, '/profile');
     }
   }
 
