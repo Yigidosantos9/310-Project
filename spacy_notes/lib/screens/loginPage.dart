@@ -1,16 +1,20 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spacy_notes/CustomWidgets/customText.dart';
 import 'package:spacy_notes/core/constants/color_constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:spacy_notes/models/user_model.dart';
+import 'package:spacy_notes/providers/user_provider.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _emailController = TextEditingController();
@@ -40,29 +44,81 @@ class _LoginPageState extends State<LoginPage> {
       try {
         if (isLoginSelected) {
           // 🔐 Login işlemi
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
-            email: email,
-            password: password,
-          );
-          print("Login başarılı");
+          final userCredential = await FirebaseAuth.instance
+              .signInWithEmailAndPassword(email: email, password: password);
+
+          final uid = userCredential.user!.uid;
+
+          final doc =
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(uid)
+                  .get();
+
+          if (doc.exists) {
+            final userModel = UserModel.fromMap(doc.id, doc.data()!);
+            ref.read(userProvider.notifier).setUser(userModel);
+          }
+          print("Login correct");
         } else {
-          // 🆕 Sign up işlemi
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          final userCredential = await FirebaseAuth.instance
+              .createUserWithEmailAndPassword(email: email, password: password);
+
+          final uid = userCredential.user!.uid;
+
+          final defaultTeam = await FirebaseFirestore.instance
+              .collection('teams')
+              .add({
+                'name': 'My Notes',
+                'description': 'Your personal notes space',
+                'createdAt': FieldValue.serverTimestamp(),
+                'createdBy': uid,
+                'members': [uid],
+                'settings': {
+                  'canBeSeen': false,
+                  'canChangeDescName': false,
+                  'canChangeIcon': false,
+                  'canBeJoined': false,
+                },
+              });
+
+          final newUser = UserModel(
+            uid: uid,
+            username: username,
             email: email,
-            password: password,
+            joinedTeams: [defaultTeam.id],
           );
-          print("Sign up başarılı");
-          // opsiyonel: username Firestore'a yazılabilir (istersen sonra ekleyelim)
+
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(uid)
+              .set(newUser.toMap());
+
+          ref.read(userProvider.notifier).setUser(newUser);
+          print("Sign up correct");
         }
 
         Navigator.pushNamed(context, '/profile');
       } on FirebaseAuthException catch (e) {
-        print("Firebase hatası: ${e.message}");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message ?? "Something went wrong")),
-        );
+        print("Firebase Error: ${e.message}");
+
+        String message = "Something went wrong";
+
+        if (e.code == 'user-not-found') {
+          message = "User not found.";
+        } else if (e.code == 'wrong-password' || e.code == 'invalid-email') {
+          message = "Invalid email address or wrong password.";
+        } else if (e.code == 'user-disabled') {
+          message = "You have banned.";
+        } else {
+          message = "Unable to login. Please try again.";
+        }
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
       } catch (e) {
-        print("Genel hata: $e");
+        print("General Error: $e");
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("An unexpected error occurred")),
         );
