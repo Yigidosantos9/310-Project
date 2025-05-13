@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:spacy_notes/CustomWidgets/customAppBar.dart';
 import 'package:spacy_notes/CustomWidgets/customText.dart';
 import 'package:spacy_notes/core/constants/color_constants.dart';
+import 'package:spacy_notes/providers/group_provider.dart';
+import 'package:uuid/uuid.dart';
 
-class CreateTeamPage extends StatefulWidget {
+class CreateTeamPage extends ConsumerStatefulWidget {
   const CreateTeamPage({super.key});
 
   @override
-  State<CreateTeamPage> createState() => _CreateTeamPageState();
+  ConsumerState<CreateTeamPage> createState() => _CreateTeamPageState();
 }
 
-class _CreateTeamPageState extends State<CreateTeamPage> {
+class _CreateTeamPageState extends ConsumerState<CreateTeamPage> {
+  final TextEditingController _teamNameController = TextEditingController();
+  final TextEditingController _teamDescController = TextEditingController();
   bool canBeSeen = true;
   bool canChangeIcon = true;
   bool canChangeDescName = true;
-
-  final TextEditingController _teamNameController =
-      TextEditingController(); // boş
-  final TextEditingController _teamDescController =
-      TextEditingController(); // boş
+  String? generatedCode;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +39,6 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ICON + TEXT
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -125,10 +127,7 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 32),
-
-                      // ID Box
                       Container(
                         width: double.infinity,
                         height: 70,
@@ -138,27 +137,27 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                           color: AppColors.selectedTaskColor,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: const CustomText(
-                          text: "- 32693 -",
+                        child: CustomText(
+                          text:
+                              generatedCode != null
+                                  ? "- $generatedCode -"
+                                  : "- CODE -",
                           fontSize: 26,
                           color: AppColors.darkSubTextColor,
                         ),
                       ),
-
                       const SizedBox(height: 32),
-
                       const CustomText(
                         text: "Settings :",
                         fontSize: 26,
                         color: AppColors.grayTextColor,
                       ),
-
                       const SizedBox(height: 20),
-                      _buildToggleRow("Can be seen by anyone", canBeSeen, (
-                        val,
-                      ) {
-                        setState(() => canBeSeen = val);
-                      }),
+                      _buildToggleRow(
+                        "Can be seen by anyone",
+                        canBeSeen,
+                        (val) => setState(() => canBeSeen = val),
+                      ),
                       _buildToggleRow(
                         "Group members can change the icon",
                         canChangeIcon,
@@ -169,20 +168,12 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
                         canChangeDescName,
                         (val) => setState(() => canChangeDescName = val),
                       ),
-
                       const SizedBox(height: 15),
-
-                      // Create Team Button
                       SizedBox(
                         width: double.infinity,
                         height: 100,
                         child: ElevatedButton(
-                          onPressed: () {
-                            print("Team Name: ${_teamNameController.text}");
-                            print(
-                              "Team Description: ${_teamDescController.text}",
-                            );
-                          },
+                          onPressed: _createTeam,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.mainButtonColor,
                             shape: RoundedRectangleBorder(
@@ -243,5 +234,34 @@ class _CreateTeamPageState extends State<CreateTeamPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _createTeam() async {
+    final name = _teamNameController.text.trim();
+    final description = _teamDescController.text.trim();
+    final user = FirebaseAuth.instance.currentUser;
+    if (name.isEmpty || user == null) return;
+
+    final code = const Uuid().v4().substring(0, 6);
+    setState(() {
+      generatedCode = code;
+    });
+
+    final teamDoc = await FirebaseFirestore.instance.collection('teams').add({
+      'name': name,
+      'description': description,
+      'settings': {
+        'canBeSeen': canBeSeen,
+        'canChangeIcon': canChangeIcon,
+        'canChangeDescName': canChangeDescName,
+      },
+      'createdBy': user.uid,
+      'createdAt': Timestamp.now(),
+      'members': [user.uid],
+      'code': code,
+    });
+
+    ref.read(currentGroupIdProvider.notifier).state = teamDoc.id;
+    Navigator.pushNamed(context, '/tasks');
   }
 }

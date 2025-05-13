@@ -1,36 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:spacy_notes/CustomWidgets/customAppBar.dart';
 import 'package:spacy_notes/CustomWidgets/customText.dart';
 import 'package:spacy_notes/core/constants/color_constants.dart';
+import 'package:spacy_notes/providers/group_provider.dart';
 
-class JoinTeamPage extends StatefulWidget {
+class JoinTeamPage extends ConsumerStatefulWidget {
   const JoinTeamPage({super.key});
 
   @override
-  State<JoinTeamPage> createState() => _JoinTeamPageState();
+  ConsumerState<JoinTeamPage> createState() => _JoinTeamPageState();
 }
 
-class _JoinTeamPageState extends State<JoinTeamPage> {
+class _JoinTeamPageState extends ConsumerState<JoinTeamPage> {
   final TextEditingController _teamIdController = TextEditingController();
 
   String? teamName;
   String? teamDescription;
   String? ownerName;
+  String? matchedTeamId;
 
-  void fetchTeamData(String id) {
-    if (id.trim() == "32693") {
+  Future<void> fetchTeamData(String code) async {
+    final query =
+        await FirebaseFirestore.instance
+            .collection('teams')
+            .where('code', isEqualTo: code)
+            .limit(1)
+            .get();
+
+    if (query.docs.isNotEmpty) {
+      final doc = query.docs.first;
       setState(() {
-        teamName = "Lagaluga";
-        teamDescription =
-            "Our team is supposed to be the best one. However, our StarPoint is not enough to buy Buzz LightYear icon.";
-        ownerName = "Yigidosantos9";
+        matchedTeamId = doc.id;
+        teamName = doc['name'];
+        teamDescription = doc['description'];
+        ownerName = doc['createdBy'];
       });
     } else {
       setState(() {
+        matchedTeamId = null;
         teamName = null;
         teamDescription = null;
         ownerName = null;
       });
+    }
+  }
+
+  Future<void> joinTeam() async {
+    if (matchedTeamId != null) {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final teamRef = FirebaseFirestore.instance
+          .collection('teams')
+          .doc(matchedTeamId);
+      await teamRef.update({
+        'members': FieldValue.arrayUnion([user.uid]),
+      });
+
+      ref.read(currentGroupIdProvider.notifier).state = matchedTeamId;
+      Navigator.pushNamed(context, '/tasks');
     }
   }
 
@@ -50,7 +81,6 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Team ID input
                       Container(
                         height: 80,
                         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -87,15 +117,13 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
                                 color: AppColors.mainButtonColor,
                               ),
                               onPressed: () {
-                                fetchTeamData(_teamIdController.text);
+                                fetchTeamData(_teamIdController.text.trim());
                               },
                             ),
                           ],
                         ),
                       ),
-
                       const SizedBox(height: 28),
-
                       if (teamName != null)
                         _buildInfoBox(
                           context,
@@ -104,9 +132,7 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
                           fontSize: 28,
                           centerText: true,
                         ),
-
                       if (teamName != null) const SizedBox(height: 28),
-
                       if (teamDescription != null)
                         _buildInfoBox(
                           context,
@@ -117,9 +143,7 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
                           centerText: false,
                           maxLines: null,
                         ),
-
                       if (ownerName != null) const SizedBox(height: 36),
-
                       if (ownerName != null)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 20),
@@ -127,50 +151,46 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Icon + Name
                               Column(
                                 children: [
                                   Container(
-                                    width: 150,
-                                    height: 150,
+                                    width: 120,
+                                    height: 120,
                                     decoration: BoxDecoration(
                                       color: AppColors.selectedTaskColor,
-                                      borderRadius: BorderRadius.circular(28),
+                                      borderRadius: BorderRadius.circular(24),
                                     ),
                                     child: const Icon(
                                       Icons.public,
-                                      size: 100,
+                                      size: 72,
                                       color: AppColors.mainButtonColor,
                                     ),
                                   ),
                                   const SizedBox(height: 8),
                                   const CustomText(
                                     text: "Icon Name",
-                                    fontSize: 30,
+                                    fontSize: 22,
                                     color: AppColors.grayTextColor,
                                     textAlign: TextAlign.center,
                                   ),
                                 ],
                               ),
                               const SizedBox(width: 20),
-                              // OWNER info
-                              SizedBox(
+                              Flexible(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     const CustomText(
                                       text: "OWNER :",
-                                      fontSize: 40,
-                                      //fontWeight: FontWeight.bold,
+                                      fontSize: 28,
                                       color: Colors.white,
                                       textAlign: TextAlign.center,
                                     ),
                                     const SizedBox(height: 4),
                                     CustomText(
                                       text: ownerName!,
-                                      fontSize: 30,
-                                      //fontWeight: FontWeight.w600,
+                                      fontSize: 22,
                                       color: AppColors.grayTextColor,
                                       textAlign: TextAlign.center,
                                     ),
@@ -180,19 +200,14 @@ class _JoinTeamPageState extends State<JoinTeamPage> {
                             ],
                           ),
                         ),
-
-                      Expanded(child: Container()),
-
-                      // Join Team Button
+                      const Spacer(),
                       Padding(
                         padding: const EdgeInsets.only(bottom: 24.0),
                         child: SizedBox(
                           width: double.infinity,
                           height: 100,
                           child: ElevatedButton(
-                            onPressed: () {
-                              print("Join Team tapped");
-                            },
+                            onPressed: joinTeam,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.mainButtonColor,
                               shape: RoundedRectangleBorder(
