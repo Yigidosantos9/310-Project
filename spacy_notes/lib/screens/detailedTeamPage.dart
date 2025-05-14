@@ -5,11 +5,13 @@ import 'package:spacy_notes/core/constants/color_constants.dart';
 
 class TeamNamePage extends StatelessWidget {
   const TeamNamePage({super.key});
+  
 
   @override
   Widget build(BuildContext context) {
+    final team = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     return Scaffold(
-  appBar: CustomAppBar(title: "Team Name"),
+  appBar: CustomAppBar(title: team['name']),
   body: SingleChildScrollView(
     
     child: Column(
@@ -39,7 +41,7 @@ class _DescriptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<bool> switches = [true, false, true, false];
+    final team = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -55,7 +57,7 @@ class _DescriptionCard extends StatelessWidget {
         children: [
           Center(child: CustomText(text: "- Description -",color: AppColors.mainButtonColor,)),
           const SizedBox(height: 8),
-          CustomText(text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text",fontSize: 18,),
+          CustomText(text: team['description']),
         ],
       ),
     );
@@ -72,10 +74,7 @@ class _MembersSectionState extends State<MembersSection> {
   final PageController _controller = PageController();
   int _currentPage = 0;
 
-  final List<String> members = [
-    "Lotti", "Santos", "Ada", "Mira",
-    "Kai", "Zane", "Nora", "Eren"
-  ];
+  List<String> members=[];
 
   List<List<String>> get chunked {
     List<List<String>> pages = [];
@@ -87,6 +86,8 @@ class _MembersSectionState extends State<MembersSection> {
 
   @override
   Widget build(BuildContext context) {
+    final team = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    members = List<String>.from(team['members']);
     return Column(
       children: [
         Padding(

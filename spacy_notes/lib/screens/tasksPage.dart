@@ -24,7 +24,7 @@ class _TasksPageState extends ConsumerState<TasksPage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(title: 'GROUP TASKS'),
+      appBar: const CustomAppBar(title: 'GROUP', subTitle: 'TASKS'),
       body: taskListAsync.when(
         data:
             (tasks) => ListView.builder(

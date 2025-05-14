@@ -260,6 +260,13 @@ class _CreateTeamPageState extends ConsumerState<CreateTeamPage> {
       'members': [user.uid],
       'code': code,
     });
+    
+    final teamSnapshot = await teamDoc.get(); 
+    final codeFromDB = teamSnapshot['code']; 
+
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+      'joinedTeams': FieldValue.arrayUnion([codeFromDB]),
+    });
 
     ref.read(currentGroupIdProvider.notifier).state = teamDoc.id;
     Navigator.pushNamed(context, '/tasks');
