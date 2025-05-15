@@ -119,7 +119,7 @@ Widget build(BuildContext context) {
             padding: const EdgeInsets.only(right: 12),
             child: Row(
               children: [
-                rhs?? SizedBox(),
+                rhs?? SizedBox(width: 30,),
               ],
             ),
           ),

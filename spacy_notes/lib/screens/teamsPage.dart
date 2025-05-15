@@ -20,7 +20,7 @@ class _TeamsPageState extends ConsumerState<TeamsPage> {
 
     return SafeArea(
     child: Scaffold(
-      appBar: const CustomAppBar(title: "My Teams"),
+      appBar: const CustomAppBar(title: "My",subTitle: "Teams",),
       body: teamsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Error: $err')),

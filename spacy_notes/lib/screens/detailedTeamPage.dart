@@ -16,22 +16,25 @@ class TeamNamePage extends StatelessWidget {
     final team = ModalRoute.of(context)!.settings.arguments as TeamModel;
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: CustomAppBar(title: team.name),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const SizedBox(height: 16),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: _DescriptionCard(team: team),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: MembersSection(team: team),
             ),
-            _TasksSection(team: team,),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
+            TasksSection(team: team),
+            const SizedBox(height: 24),
             _SettingsSection(settings: team.settings),
           ],
         ),
@@ -46,50 +49,47 @@ class _DescriptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.selectedTaskColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.secondary, width: 2),
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: AppColors.mainButtonColor.withOpacity(0.5)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: CustomText(
-              text: "- Description -",
-              color: AppColors.mainButtonColor,
+      color: const Color.fromARGB(255, 17, 1, 37).withOpacity(0.8),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            const CircleAvatar(
+              radius: 50,
+              backgroundImage: AssetImage('assets/images/astronaut.png'),
             ),
-          ),
-          const SizedBox(height: 8),
-          CustomText(text: team.description),
-        ],
+            const SizedBox(height: 16),
+            CustomText(
+              text: team.name,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppColors.onSecondary,
+              fontFamily: "jersey",
+            ),
+            const SizedBox(height: 8),
+            CustomText(
+              text: team.description,
+              color: AppColors.onPrimary,
+              fontSize: 16,
+              fontFamily: "jersey",
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class MembersSection extends StatefulWidget {
+class MembersSection extends StatelessWidget {
   final TeamModel team;
   const MembersSection({super.key, required this.team});
-
-  @override
-  State<MembersSection> createState() => _MembersSectionState();
-}
-
-class _MembersSectionState extends State<MembersSection> {
-  final PageController _controller = PageController();
-  int _currentPage = 0;
-
-  List<List<String>> get chunked {
-    final members = widget.team.members;
-    List<List<String>> pages = [];
-    for (int i = 0; i < members.length; i += 4) {
-      pages.add(members.sublist(i, (i + 4).clamp(0, members.length)));
-    }
-    return pages;
-  }
 
   Future<List<String>> _getUsernames(List<String> uids) async {
     return await Future.wait(uids.map((uid) async {
@@ -100,133 +100,92 @@ class _MembersSectionState extends State<MembersSection> {
 
   @override
   Widget build(BuildContext context) {
-    final pages = chunked;
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              color: AppColors.selectedTaskColor,
-              border: Border.all(color: AppColors.secondary, width: 2),
-            ),
-            height: 450,
-            child: Column(
-              children: [
-                const SizedBox(height: 16),
-                const CustomText(
-                  text: "- Members -",
-                  color: AppColors.mainButtonColor,
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 16.0),
-                    child: PageView.builder(
-                      controller: _controller,
-                      itemCount: pages.length,
-                      onPageChanged: (index) => setState(() => _currentPage = index),
-                      itemBuilder: (context, pageIndex) {
-                        final uids = pages[pageIndex];
-
-                        return FutureBuilder<List<String>>(
-                          future: _getUsernames(uids),
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return const Center(child: CircularProgressIndicator());
-                            }
-                            final usernames = snapshot.data!;
-                            return GridView.count(
-                              crossAxisCount: 2,
-                              childAspectRatio: 1,
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              children: List.generate(4, (i) {
-                                if (i >= usernames.length) return const SizedBox();
-                                return Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      height: 100,
-                                      width: 100,
-                                      decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                          image: AssetImage('assets/images/astronaut.png'),
-                                          fit: BoxFit.cover,
-                                        ),
-                                        color: AppColors.unselectedTaskColor,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    CustomText(
-                                      text: usernames[i],
-                                      fontSize: 18,
-                                      color: AppColors.mainButtonColor,
-                                    ),
-                                  ],
-                                );
-                              }),
-                            );
-                          },
-                        );
-                      },
-                    ),
+    return FutureBuilder<List<String>>(
+      future: _getUsernames(team.members),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final usernames = snapshot.data!;
+        return Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(color: AppColors.mainButtonColor.withOpacity(0.5)),
+          ),
+          color: const Color.fromARGB(255, 17, 1, 37).withOpacity(0.8),
+          child: SizedBox(
+            height: 130,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.all(16),
+              itemCount: usernames.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 16),
+              itemBuilder: (context, i) => Column(
+                children: [
+                  const CircleAvatar(
+                    radius: 30,
+                    backgroundImage: AssetImage('assets/images/astronaut.png'),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  CustomText(
+                    text: usernames[i],
+                    fontSize: 16,
+                    color: AppColors.onSecondary,
+                    fontFamily: "jersey",
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(pages.length, (index) {
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: _currentPage == index ? Colors.purple : Colors.grey,
-                shape: BoxShape.circle,
-              ),
-            );
-          }),
-        ),
-      ],
+        );
+      },
     );
   }
 }
 
-class _TasksSection extends ConsumerStatefulWidget {
+
+class TasksSection extends ConsumerStatefulWidget {
   final TeamModel team;
-  const _TasksSection({super.key, required this.team});
+  const TasksSection({super.key, required this.team});
 
   @override
-  ConsumerState<_TasksSection> createState() => _TasksSectionState();
+  ConsumerState<TasksSection> createState() => _TasksSectionState();
 }
 
-class _TasksSectionState extends ConsumerState<_TasksSection> {
+class _TasksSectionState extends ConsumerState<TasksSection> {
   @override
   Widget build(BuildContext context) {
     final taskController = ref.read(taskControllerProvider);
 
     return Padding(
-      padding: const EdgeInsets.all(32.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              CustomText(text: "- Tasks -", color: AppColors.selectedTaskColor),
-              GestureDetector(
-                child: CustomText(text: "All", color: AppColors.selectedTaskColor),
-                onTap: () {
-                  Navigator.of(context).pushNamed('/tasks', arguments: widget.team);
-                },
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const CustomText(
+                  text: "- Tasks -",
+                  color: AppColors.selectedTaskColor,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+                GestureDetector(
+                  child: const CustomText(
+                    text: "See All",
+                    color: AppColors.mainButtonColor,
+                    fontSize: 16,
+                  ),
+                  onTap: () {
+                    Navigator.of(context).pushNamed('/tasks', arguments: widget.team);
+                  },
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 16),
           StreamBuilder(
@@ -262,6 +221,7 @@ class _TasksSectionState extends ConsumerState<_TasksSection> {
                         text: "Create Task",
                         color: Colors.white,
                         fontSize: 16,
+                        fontFamily: "jersey",
                       ),
                     ),
                   ],
@@ -272,41 +232,49 @@ class _TasksSectionState extends ConsumerState<_TasksSection> {
               final tasks = docs.take(4).map((doc) =>
                   TaskModel.fromFirestore(doc.id, doc.data() as Map<String, dynamic>)).toList();
 
-              return Column(
-                children: tasks.map((task) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: Container(
-                    height: 60,
-                    alignment: Alignment.centerLeft,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: AppColors.selectedTaskColor,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: AppColors.secondary, width: 2),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Row(
-                        children: [
-                          Checkbox(
-                            value: task.isCompleted,
-                            onChanged: (_) async {
-                              await taskController.toggleCompleted(task);
-                            },
-                            activeColor: AppColors.mainButtonColor,
-                            checkColor: AppColors.grayTextColor,
-                            side: const BorderSide(color: AppColors.secondary, width: 2),
-                          ),
-                          const SizedBox(width: 8),
-                          CustomText(
-                            text: task.title,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ],
+              return Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(color: AppColors.mainButtonColor.withOpacity(0.5)),
+                ),
+                color: const Color.fromARGB(255, 17, 1, 37).withOpacity(0.1),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: tasks.map((task) => Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.grayTextColor.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: AppColors.mainButtonColor.withOpacity(0.5), width: 2),
+                        ),
+                        child: Row(
+                          children: [
+                            Checkbox(
+                              value: task.isCompleted,
+                              onChanged: (_) async {
+                                await taskController.toggleCompleted(task);
+                              },
+                              activeColor: AppColors.mainButtonColor.withOpacity(0.5),
+                              checkColor: AppColors.background,
+                              side: BorderSide(color: AppColors.mainButtonColor.withOpacity(0.5), width: 2),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: CustomText(
+                                text: task.title,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.onSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                    )).toList(),
                   ),
-                )).toList(),
+                ),
               );
             },
           ),
@@ -315,6 +283,8 @@ class _TasksSectionState extends ConsumerState<_TasksSection> {
     );
   }
 }
+
+
 
 class _SettingsSection extends StatefulWidget {
   final Map<String, bool> settings;
@@ -339,42 +309,43 @@ class _SettingsSectionState extends State<_SettingsSection> {
   }
 
   @override
-Widget build(BuildContext context) {
-  return Padding(
-    padding: const EdgeInsets.all(32.0),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const CustomText(
-          text: "- Settings -",
-          color: AppColors.selectedTaskColor,
-        ),
-        const SizedBox(height: 12),
-        ...List.generate(switches.length, (index) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const CustomText(
-                  text: "Let everyone to Join",
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                ),
-                Switch(
-                  value: switches[index],
-                  onChanged: (value) {
-                    setState(() => switches[index] = value);
-                  },
-                  activeColor: Colors.white,
-                  activeTrackColor: Colors.purple,
-                ),
-              ],
-            ),
-          );
-        }),
-      ],
-    ),
-  );
-}
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 40.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const CustomText(
+            text: "- Settings -",
+            color: AppColors.selectedTaskColor,
+          ),
+          const SizedBox(height: 12),
+          ...List.generate(switches.length, (index) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const CustomText(
+                    text: "Let others see this team",
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.onPrimary,
+                  ),
+                  Switch(
+                    value: switches[index],
+                    onChanged: (value) {
+                      setState(() => switches[index] = value);
+                    },
+                    activeColor: Colors.white,
+                    activeTrackColor: Colors.purple,
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
 }
