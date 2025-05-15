@@ -5,8 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:spacy_notes/CustomWidgets/customAppBar.dart';
 import 'package:spacy_notes/CustomWidgets/customText.dart';
 import 'package:spacy_notes/core/constants/color_constants.dart';
+import 'package:spacy_notes/models/team_model.dart';
 import 'package:spacy_notes/providers/group_provider.dart';
-import 'package:uuid/uuid.dart';
+import 'package:spacy_notes/providers/user_provider.dart';
 
 class CreateTeamPage extends ConsumerStatefulWidget {
   const CreateTeamPage({super.key});
@@ -237,38 +238,40 @@ class _CreateTeamPageState extends ConsumerState<CreateTeamPage> {
   }
 
   Future<void> _createTeam() async {
-    final name = _teamNameController.text.trim();
-    final description = _teamDescController.text.trim();
-    final user = FirebaseAuth.instance.currentUser;
-    if (name.isEmpty || user == null) return;
+  final name = _teamNameController.text.trim();
+  final description = _teamDescController.text.trim();
+  final user = FirebaseAuth.instance.currentUser;
+  if (name.isEmpty || user == null) return;
 
-    final code = const Uuid().v4().substring(0, 6);
-    setState(() {
-      generatedCode = code;
-    });
+  final teamDoc = await TeamModel.createTeam(
+    name: name,
+    description: description,
+    user: user,
+    settings: {
+      'canBeSeen': canBeSeen,
+      'canChangeIcon': canChangeIcon,
+      'canChangeDescName': canChangeDescName,
+    },
+  );
 
-    final teamDoc = await FirebaseFirestore.instance.collection('teams').add({
-      'name': name,
-      'description': description,
-      'settings': {
-        'canBeSeen': canBeSeen,
-        'canChangeIcon': canChangeIcon,
-        'canChangeDescName': canChangeDescName,
-      },
-      'createdBy': user.uid,
-      'createdAt': Timestamp.now(),
-      'members': [user.uid],
-      'code': code,
-    });
-    
-    final teamSnapshot = await teamDoc.get(); 
-    final codeFromDB = teamSnapshot['code']; 
+  final codeFromDB = (await teamDoc.get())['code'] as String;
 
-    await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-      'joinedTeams': FieldValue.arrayUnion([codeFromDB]),
-    });
+  await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+    'joinedTeams': FieldValue.arrayUnion([codeFromDB]),
+  });
 
-    ref.read(currentGroupIdProvider.notifier).state = teamDoc.id;
-    Navigator.pushNamed(context, '/tasks');
+  final currentUser = ref.read(userProvider);
+  if (currentUser != null) {
+    final updatedUser = currentUser.copyWith(
+      joinedTeams: [...currentUser.joinedTeams, codeFromDB],
+    );
+    ref.read(userProvider.notifier).setUser(updatedUser);
+    print("userProvider güncellendi: ${updatedUser.joinedTeams}");
+  }
+
+  ref.read(currentGroupIdProvider.notifier).state = teamDoc.id;
+
+  // 6️⃣ Görev sayfasına yönlendir
+  Navigator.pushNamed(context, '/teams');
   }
 }

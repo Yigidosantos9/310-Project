@@ -25,12 +25,9 @@ class _TeamsPageState extends ConsumerState<TeamsPage> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Error: $err')),
         data: (teams) {
-          if (teams.isEmpty) {
-            return const Center(child: Text("You don't have any teams yet."));
-          }
-
           return Column(
             children: [
+              teams.isEmpty?Expanded(child: Center(child: Text("You don't have any teams yet."))):
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16),
@@ -39,11 +36,10 @@ class _TeamsPageState extends ConsumerState<TeamsPage> {
                     final team = teams[index];
                     return TeamCard(
                       onTap: () {
-                        // Burada team ID veya code üzerinden detay sayfasına gidebilirsin
                         Navigator.of(context).pushNamed('/detailedTeam', arguments: team);
                       },
-                      teamName: team['name'] ?? 'Unnamed Team',
-                      description: team['description'] ?? 'No description available',
+                      teamName: team.name,
+                      description: team.description,
                     );
                   },
                 ),

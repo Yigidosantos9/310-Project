@@ -6,6 +6,7 @@ import 'package:spacy_notes/core/constants/color_constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:spacy_notes/models/user_model.dart';
 import 'package:spacy_notes/providers/user_provider.dart';
+import 'package:uuid/uuid.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -67,26 +68,29 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           final uid = userCredential.user!.uid;
 
           final defaultTeam = await FirebaseFirestore.instance
-              .collection('teams')
-              .add({
-                'name': 'My Notes',
-                'description': 'Your personal notes space',
-                'createdAt': FieldValue.serverTimestamp(),
-                'createdBy': uid,
-                'members': [uid],
-                'settings': {
-                  'canBeSeen': false,
-                  'canChangeDescName': false,
-                  'canChangeIcon': false,
-                  'canBeJoined': false,
-                },
-              });
+          .collection('teams')
+          .add({
+            'name': 'My Notes',
+            'description': 'Your personal notes space',
+            'createdAt': FieldValue.serverTimestamp(),
+            'createdBy': uid,
+            'members': [uid],
+            'code': const Uuid().v4().substring(0, 6),
+            'settings': {
+              'canBeSeen': false,
+              'canChangeDescName': false,
+              'canChangeIcon': false,
+              'canBeJoined': false,
+            },
+          });
+
+          final teamCode = (await defaultTeam.get())['code'];
 
           final newUser = UserModel(
             uid: uid,
             username: username,
             email: email,
-            joinedTeams: [defaultTeam.id],
+            joinedTeams: [teamCode],
           );
 
           await FirebaseFirestore.instance

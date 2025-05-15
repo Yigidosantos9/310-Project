@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spacy_notes/providers/market_providers/market_data_provider.dart';
+import 'package:spacy_notes/providers/user_provider.dart';
 import 'package:spacy_notes/widgets/market_widgets/cut_corner_color_card.dart';
 import 'package:spacy_notes/widgets/market_widgets/planet_card_widget.dart';
 import 'package:spacy_notes/widgets/market_widgets/profile_picture_card.dart';
@@ -13,8 +14,6 @@ class MarketPage extends ConsumerStatefulWidget {
 }
 
 class _MarketPageState extends ConsumerState<MarketPage> {
-  int coinAmount = 42;
-
   final List<String> moreItems = [
     "Item 1",
     "Item 2",
@@ -28,6 +27,8 @@ class _MarketPageState extends ConsumerState<MarketPage> {
     final planetsAsync = ref.watch(planetsProvider);
     final profilesAsync = ref.watch(profilesProvider);
     final palettesAsync = ref.watch(palettesProvider);
+    final user = ref.watch(userProvider);
+    final coinAmount = user?.starPoints ?? 0;
 
     return Scaffold(
       backgroundColor: const Color(0xFF060B36),

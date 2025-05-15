@@ -1,4 +1,5 @@
-// lib/models/task_model.dart
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class TaskModel {
   final String id;
   final String title;
@@ -6,6 +7,9 @@ class TaskModel {
   final bool isCompleted;
   final String groupId;
   final String createdBy;
+  final DateTime? createdAt;
+  final String? completedBy;
+  final DateTime? completedAt;
 
   TaskModel({
     required this.id,
@@ -14,6 +18,9 @@ class TaskModel {
     required this.isCompleted,
     required this.groupId,
     required this.createdBy,
+    this.createdAt,
+    this.completedBy,
+    this.completedAt,
   });
 
   factory TaskModel.fromFirestore(String id, Map<String, dynamic> data) {
@@ -24,6 +31,9 @@ class TaskModel {
       isCompleted: data['isCompleted'] ?? false,
       groupId: data['groupId'] ?? '',
       createdBy: data['createdBy'] ?? '',
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
+      completedBy: data['completedBy'],
+      completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
     );
   }
 
@@ -34,7 +44,9 @@ class TaskModel {
       'isCompleted': isCompleted,
       'groupId': groupId,
       'createdBy': createdBy,
-      'createdAt': DateTime.now(),
+      'createdAt': createdAt ?? DateTime.now(),
+      if (completedBy != null) 'completedBy': completedBy,
+      if (completedAt != null) 'completedAt': completedAt,
     };
   }
 }
