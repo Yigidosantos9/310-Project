@@ -11,9 +11,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
-  String _formatTimeWorked(int minutes) {
-    final h = minutes ~/ 60;
-    final m = minutes % 60;
+  String _formatTimeWorked(int seconds) {
+    final m = (seconds / 60).toInt();
+    final h = m ~/ 60;
     return '$h h $m m';
   }
 
@@ -25,14 +25,16 @@ class ProfilePage extends ConsumerWidget {
     final double horizontalPadding = size.width * 0.06;
 
     return userAsync.when(
-      loading: () => const Scaffold(
-        backgroundColor: Color.fromARGB(255, 17, 1, 37),
-        body: Center(child: CircularProgressIndicator()),
-      ),
-      error: (e, _) => Scaffold(
-        backgroundColor: AppColors.background,
-        body: Center(child: Text("Error: $e")),
-      ),
+      loading:
+          () => const Scaffold(
+            backgroundColor: Color.fromARGB(255, 17, 1, 37),
+            body: Center(child: CircularProgressIndicator()),
+          ),
+      error:
+          (e, _) => Scaffold(
+            backgroundColor: AppColors.background,
+            body: Center(child: Text("Error: $e")),
+          ),
       data: (user) {
         if (user == null) {
           return Scaffold(
@@ -143,8 +145,8 @@ class ProfilePage extends ConsumerWidget {
       },
     );
   }
-  
-Widget _buildProfileHeader(
+
+  Widget _buildProfileHeader(
     BuildContext context,
     UserModel user,
     bool isSmallScreen,
@@ -161,68 +163,18 @@ Widget _buildProfileHeader(
       color: const Color.fromARGB(255, 17, 1, 37).withOpacity(0.8),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: isSmallScreen
-           
-            ? Column(
-                children: [
-                  const CircleAvatar(
-                    radius: 60,
-                    backgroundImage: AssetImage(
-                      'assets/images/astronaut.png',
+        child:
+            isSmallScreen
+                ? Column(
+                  children: [
+                    const CircleAvatar(
+                      radius: 60,
+                      backgroundImage: AssetImage(
+                        'assets/images/astronaut.png',
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Column(
-                    children: [
-                      const CustomText(
-                        text: 'Nickname',
-                        color: AppColors.onPrimary,
-                        fontSize: 18,
-                        fontFamily: "jersey",
-                      ),
-                      const SizedBox(height: 4),
-                      CustomText(
-                        text: user.username,
-                        color: AppColors.onSecondary,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: "jersey",
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.star,
-                            color: Colors.amber,
-                            size: 24,
-                          ),
-                          const SizedBox(width: 8),
-                          CustomText(
-                            text: '${user.starPoints} S.P.',
-                            color: AppColors.onPrimary,
-                            fontSize: 20,
-                            fontFamily: "jersey",
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              )
-            
-            : Row(
-                children: [
-                  const CircleAvatar(
-                    radius: 60,
-                    backgroundImage: AssetImage(
-                      'assets/images/astronaut.png',
-                    ),
-                  ),
-                  const SizedBox(width: 24),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    const SizedBox(height: 16),
+                    Column(
                       children: [
                         const CustomText(
                           text: 'Nickname',
@@ -230,6 +182,7 @@ Widget _buildProfileHeader(
                           fontSize: 18,
                           fontFamily: "jersey",
                         ),
+                        const SizedBox(height: 4),
                         CustomText(
                           text: user.username,
                           color: AppColors.onSecondary,
@@ -237,8 +190,9 @@ Widget _buildProfileHeader(
                           fontWeight: FontWeight.bold,
                           fontFamily: "jersey",
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 12),
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Icon(
                               Icons.star,
@@ -256,14 +210,61 @@ Widget _buildProfileHeader(
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                )
+                : Row(
+                  children: [
+                    const CircleAvatar(
+                      radius: 60,
+                      backgroundImage: AssetImage(
+                        'assets/images/astronaut.png',
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const CustomText(
+                            text: 'Nickname',
+                            color: AppColors.onPrimary,
+                            fontSize: 18,
+                            fontFamily: "jersey",
+                          ),
+                          CustomText(
+                            text: user.username,
+                            color: AppColors.onSecondary,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: "jersey",
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 8),
+                              CustomText(
+                                text: '${user.starPoints} S.P.',
+                                color: AppColors.onPrimary,
+                                fontSize: 20,
+                                fontFamily: "jersey",
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
       ),
     );
   }
 
-Widget _buildStatsCards(BuildContext context, UserModel user) {
+  Widget _buildStatsCards(BuildContext context, UserModel user) {
     return GridView.count(
       crossAxisCount: 2,
       crossAxisSpacing: 16,
@@ -289,7 +290,7 @@ Widget _buildStatsCards(BuildContext context, UserModel user) {
     );
   }
 
-Widget _buildStatCard(
+  Widget _buildStatCard(
     BuildContext context, {
     required IconData icon,
     required String title,
@@ -337,13 +338,12 @@ Widget _buildStatCard(
     );
   }
 
-Widget _buildTeamsButton(BuildContext context) {
+  Widget _buildTeamsButton(BuildContext context) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () {
-          
           Navigator.pushNamed(context, '/teams');
         },
         borderRadius: BorderRadius.circular(16),
@@ -393,7 +393,7 @@ Widget _buildTeamsButton(BuildContext context) {
     );
   }
 
-Widget _buildBadgesSection(BuildContext context) {
+  Widget _buildBadgesSection(BuildContext context) {
     // Bu fonksiyon badge'leri göstermek için kullanılır
     // Badge'leri rastgele göstermek için bir liste oluşturalım
     final List<Map<String, dynamic>> badges = [
@@ -482,138 +482,148 @@ Widget _buildBadgesSection(BuildContext context) {
               width: 1.5,
             ),
           ),
-          child: badges.isEmpty
-              ? const Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 24),
-                    child: CustomText(
-                      text: 'No badges earned yet',
-                      color: AppColors.onPrimary,
-                      fontSize: 16,
-                      fontFamily: "jersey",
+          child:
+              badges.isEmpty
+                  ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 24),
+                      child: CustomText(
+                        text: 'No badges earned yet',
+                        color: AppColors.onPrimary,
+                        fontSize: 16,
+                        fontFamily: "jersey",
+                      ),
                     ),
-                  ),
-                )
-              : GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: badges.length > 6 ? 6 : badges.length, // Show max 6 badges
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 1.0,
-                  ),
-                  itemBuilder: (context, index) {
-                    final badge = badges[index];
-                    final bool isUnlocked = badge['unlocked'] as bool;
+                  )
+                  : GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount:
+                        badges.length > 6
+                            ? 6
+                            : badges.length, // Show max 6 badges
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          childAspectRatio: 1.0,
+                        ),
+                    itemBuilder: (context, index) {
+                      final badge = badges[index];
+                      final bool isUnlocked = badge['unlocked'] as bool;
 
-                    return GestureDetector(
-                      onTap: () {
-                        // Badge'e tıklandığında detaylarını göster
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            backgroundColor: const Color.fromARGB(
-                              255,
-                              17,
-                              1,
-                              37,
+                      return GestureDetector(
+                        onTap: () {
+                          // Badge'e tıklandığında detaylarını göster
+                          showDialog(
+                            context: context,
+                            builder:
+                                (context) => AlertDialog(
+                                  backgroundColor: const Color.fromARGB(
+                                    255,
+                                    17,
+                                    1,
+                                    37,
+                                  ),
+                                  title: CustomText(
+                                    text: badge['name'],
+                                    color: AppColors.onSecondary,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: "jersey",
+                                  ),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SvgPicture.asset(
+                                        badge['image'],
+                                        width: 100,
+                                        height: 100,
+                                        colorFilter:
+                                            isUnlocked
+                                                ? null
+                                                : const ColorFilter.mode(
+                                                  Colors.grey,
+                                                  BlendMode.saturation,
+                                                ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      CustomText(
+                                        text:
+                                            isUnlocked
+                                                ? 'You\'ve earned this badge!'
+                                                : 'Badge locked. Complete more tasks to unlock!',
+                                        color: AppColors.onPrimary,
+                                        fontSize: 16,
+                                        textAlign: TextAlign.center,
+                                        fontFamily: "jersey",
+                                      ),
+                                    ],
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const CustomText(
+                                        text: 'Close',
+                                        color: AppColors.mainButtonColor,
+                                        fontSize: 16,
+                                        fontFamily: "jersey",
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                          );
+                        },
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  SvgPicture.asset(
+                                    badge['image'],
+                                    width: 60,
+                                    height: 60,
+                                    colorFilter:
+                                        isUnlocked
+                                            ? null
+                                            : const ColorFilter.mode(
+                                              Colors.grey,
+                                              BlendMode.saturation,
+                                            ),
+                                  ),
+                                  if (!isUnlocked)
+                                    const Icon(
+                                      Icons.lock,
+                                      color: Colors.white54,
+                                      size: 22,
+                                    ),
+                                ],
+                              ),
                             ),
-                            title: CustomText(
+                            const SizedBox(height: 4),
+                            CustomText(
                               text: badge['name'],
-                              color: AppColors.onSecondary,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                              color:
+                                  isUnlocked
+                                      ? AppColors.onPrimary
+                                      : AppColors.onPrimary.withOpacity(0.5),
+                              fontSize: 12,
+                              textAlign: TextAlign.center,
                               fontFamily: "jersey",
                             ),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SvgPicture.asset(
-                                  badge['image'],
-                                  width: 100,
-                                  height: 100,
-                                  colorFilter: isUnlocked
-                                      ? null
-                                      : const ColorFilter.mode(
-                                          Colors.grey,
-                                          BlendMode.saturation,
-                                        ),
-                                ),
-                                const SizedBox(height: 16),
-                                CustomText(
-                                  text: isUnlocked
-                                      ? 'You\'ve earned this badge!'
-                                      : 'Badge locked. Complete more tasks to unlock!',
-                                  color: AppColors.onPrimary,
-                                  fontSize: 16,
-                                  textAlign: TextAlign.center,
-                                  fontFamily: "jersey",
-                                ),
-                              ],
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const CustomText(
-                                  text: 'Close',
-                                  color: AppColors.mainButtonColor,
-                                  fontSize: 16,
-                                  fontFamily: "jersey",
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                SvgPicture.asset(
-                                  badge['image'],
-                                  width: 60,
-                                  height: 60,
-                                  colorFilter: isUnlocked
-                                      ? null
-                                      : const ColorFilter.mode(
-                                          Colors.grey,
-                                          BlendMode.saturation,
-                                        ),
-                                ),
-                                if (!isUnlocked)
-                                  const Icon(
-                                    Icons.lock,
-                                    color: Colors.white54,
-                                    size: 22,
-                                  ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          CustomText(
-                            text: badge['name'],
-                            color: isUnlocked
-                                ? AppColors.onPrimary
-                                : AppColors.onPrimary.withOpacity(0.5),
-                            fontSize: 12,
-                            textAlign: TextAlign.center,
-                            fontFamily: "jersey",
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
         ),
       ],
     );
   }
 
-Widget _buildActionButtons(BuildContext context) {
+  Widget _buildActionButtons(BuildContext context) {
     return Column(
       children: [
         ElevatedButton.icon(
@@ -648,9 +658,9 @@ Widget _buildActionButtons(BuildContext context) {
               await FirebaseAuth.instance.signOut();
               Navigator.pushReplacementNamed(context, '/login');
             } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error logging out: $e')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('Error logging out: $e')));
             }
           },
           style: TextButton.styleFrom(
@@ -668,6 +678,3 @@ Widget _buildActionButtons(BuildContext context) {
     );
   }
 }
-    
-
-  
