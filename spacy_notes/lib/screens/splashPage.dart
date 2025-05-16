@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:spacy_notes/CustomWidgets/customText.dart';
 import 'package:spacy_notes/core/constants/color_constants.dart';
-import 'loginPage.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -15,13 +16,29 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
+    _checkAuthStatus();
+  }
 
-    Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-      );
-    });
+  Future<void> _checkAuthStatus() async {
+    await Future.delayed(const Duration(milliseconds: 1500)); 
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      Navigator.pushReplacementNamed(context, '/login');
+    } else {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (!doc.exists) {
+        await FirebaseAuth.instance.signOut(); 
+        Navigator.pushReplacementNamed(context, '/login');
+      } else {
+        Navigator.pushReplacementNamed(context, '/profile');
+      }
+    }
   }
 
   @override
@@ -29,11 +46,8 @@ class _SplashPageState extends State<SplashPage> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-   
     final widthScale = (screenWidth / 500).clamp(0.6, 1.0).toDouble();
     final heightScale = (screenHeight / 800).clamp(0.6, 1.0).toDouble();
-
-
     final finalScale = widthScale < heightScale ? widthScale : heightScale;
 
     return SafeArea(

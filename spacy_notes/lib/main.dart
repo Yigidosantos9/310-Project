@@ -1,15 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:spacy_notes/core/constants/color_constants.dart';
-import 'package:spacy_notes/screens/market_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:spacy_notes/core/constants/color_constants.dart';
 
-// Splash & Auth
+// Sayfalar
 import 'screens/splashPage.dart';
 import 'screens/loginPage.dart';
-
-// Ana Sayfalar
 import 'screens/profilePage.dart';
 import 'screens/createTeamPage.dart';
 import 'screens/joinTeamPage.dart';
@@ -21,6 +18,7 @@ import 'screens/notePage.dart';
 import 'screens/detailedTeamPage.dart';
 import 'screens/teamsPage.dart';
 import 'screens/pomodoroPage.dart';
+import 'screens/market_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +38,7 @@ void main() async {
   } else {
     await Firebase.initializeApp();
   }
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -50,11 +49,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/splash',
-      title: 'spacy_notes',
+      title: 'Spacy Notes',
       theme: ThemeData(
-        // If you don't give a specific color these
-        // colors are asigned to your widget for their roles
         primaryColor: AppColors.primary,
         scaffoldBackgroundColor: AppColors.background,
         colorScheme: ColorScheme(
@@ -69,8 +65,9 @@ class MyApp extends StatelessWidget {
           onSurface: AppColors.onSurface,
         ),
       ),
+      initialRoute: '/',
       routes: {
-        '/splash': (context) => const SplashPage(),
+        '/': (context) => const SplashPage(),
         '/login': (context) => const LoginPage(),
         '/profile': (context) => const ProfilePage(),
         '/createTeam': (context) => const CreateTeamPage(),
@@ -86,23 +83,6 @@ class MyApp extends StatelessWidget {
         '/detailedTeam': (context) => const TeamNamePage(),
         '/market': (context) => const MarketPage(),
       },
-    );
-  }
-}
-
-// If you want you can change this widget this is just for trying something
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Spacy Notes",
-          style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-        ),
-      ),
     );
   }
 }

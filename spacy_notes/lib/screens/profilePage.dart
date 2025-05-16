@@ -49,6 +49,14 @@ class ProfilePage extends ConsumerWidget {
           appBar: CustomAppBar(
             title: 'Profile',
             subTitle: 'Notes',
+            leading: IconButton(
+              icon: const Icon(Icons.close, color: Colors.white),
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                ref.invalidate(userStreamProvider);
+                Navigator.pushReplacementNamed(context, '/login');
+              },
+            ),
             rhs: IconButton(
               icon: const Icon(Icons.settings, color: Colors.white),
               onPressed: () {},
@@ -134,7 +142,7 @@ class ProfilePage extends ConsumerWidget {
                     const SizedBox(height: 32),
                     _buildBadgesSection(context),
                     const SizedBox(height: 32),
-                    _buildActionButtons(context),
+                    _buildActionButtons(context, ref),
                     const SizedBox(height: 24),
                   ],
                 ),
@@ -283,7 +291,7 @@ class ProfilePage extends ConsumerWidget {
           context,
           icon: Icons.check_circle,
           title: 'Tasks Completed',
-          value: '${user.tasksCompleted} / ${user.totalTasks ?? 0}',
+          value: '${user.tasksCompleted} / ${user.totalTasks}',
           color: Colors.green[700]!,
         ),
       ],
@@ -623,7 +631,7 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) {
+  Widget _buildActionButtons(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
         ElevatedButton.icon(
@@ -653,9 +661,9 @@ class ProfilePage extends ConsumerWidget {
         const SizedBox(height: 12),
         TextButton.icon(
           onPressed: () async {
-            // Logout functionality
             try {
               await FirebaseAuth.instance.signOut();
+              ref.invalidate(userStreamProvider);
               Navigator.pushReplacementNamed(context, '/login');
             } catch (e) {
               ScaffoldMessenger.of(

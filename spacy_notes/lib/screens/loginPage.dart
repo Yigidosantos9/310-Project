@@ -44,7 +44,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       try {
         if (isLoginSelected) {
-          // 🔐 Login işlemi
+
           final userCredential = await FirebaseAuth.instance
               .signInWithEmailAndPassword(email: email, password: password);
 
@@ -56,11 +56,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   .doc(uid)
                   .get();
 
-          if (doc.exists) {
-            final userModel = UserModel.fromMap(doc.id, doc.data()!);
-            ref.read(userProvider.notifier).setUser(userModel);
-          }
           print("Login correct");
+          ref.invalidate(userStreamProvider);
+          Navigator.pushReplacementNamed(context, '/profile');
         } else {
           final userCredential = await FirebaseAuth.instance
               .createUserWithEmailAndPassword(email: email, password: password);
@@ -68,21 +66,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           final uid = userCredential.user!.uid;
 
           final defaultTeam = await FirebaseFirestore.instance
-          .collection('teams')
-          .add({
-            'name': 'My Notes',
-            'description': 'Your personal notes space',
-            'createdAt': FieldValue.serverTimestamp(),
-            'createdBy': uid,
-            'members': [uid],
-            'code': const Uuid().v4().substring(0, 6),
-            'settings': {
-              'canBeSeen': false,
-              'canChangeDescName': false,
-              'canChangeIcon': false,
-              'canBeJoined': false,
-            },
-          });
+              .collection('teams')
+              .add({
+                'name': 'My Notes',
+                'description': 'Your personal notes space',
+                'createdAt': FieldValue.serverTimestamp(),
+                'createdBy': uid,
+                'members': [uid],
+                'code': const Uuid().v4().substring(0, 6),
+                'settings': {
+                  'canBeSeen': false,
+                  'canChangeDescName': false,
+                  'canChangeIcon': false,
+                  'canBeJoined': false,
+                },
+              });
 
           final teamCode = (await defaultTeam.get())['code'];
 
@@ -98,11 +96,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               .doc(uid)
               .set(newUser.toMap());
 
-          ref.read(userProvider.notifier).setUser(newUser);
           print("Sign up correct");
+          ref.invalidate(userStreamProvider);
+          Navigator.pushReplacementNamed(context, '/profile');
         }
-
-        Navigator.pushNamed(context, '/profile');
       } on FirebaseAuthException catch (e) {
         print("Firebase Error: ${e.message}");
 

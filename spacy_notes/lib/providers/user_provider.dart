@@ -21,11 +21,14 @@ final userProvider = StateNotifierProvider<UserNotifier, UserModel?>(
 
 final userStreamProvider = StreamProvider<UserModel?>((ref) {
   final firebaseUser = FirebaseAuth.instance.currentUser;
-  if (firebaseUser == null) return  Stream.value(null);
+  if (firebaseUser == null) return Stream.value(null);
 
   final docRef = FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid);
   return docRef.snapshots().map((doc) {
     if (!doc.exists) return null;
-    return UserModel.fromMap(doc.id, doc.data()!);
+    final user = UserModel.fromMap(doc.id, doc.data()!);
+
+    ref.read(userProvider.notifier).setUser(user);
+    return user;
   });
 });
