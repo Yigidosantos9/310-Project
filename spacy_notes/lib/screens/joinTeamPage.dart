@@ -1,3 +1,4 @@
+// join_team_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,6 +7,7 @@ import 'package:spacy_notes/CustomWidgets/customAppBar.dart';
 import 'package:spacy_notes/CustomWidgets/customText.dart';
 import 'package:spacy_notes/core/constants/color_constants.dart';
 import 'package:spacy_notes/providers/group_provider.dart';
+import 'package:spacy_notes/providers/team_provider.dart';
 
 class JoinTeamPage extends ConsumerStatefulWidget {
   const JoinTeamPage({super.key});
@@ -23,20 +25,26 @@ class _JoinTeamPageState extends ConsumerState<JoinTeamPage> {
   String? matchedTeamId;
 
   Future<void> fetchTeamData(String code) async {
-    final query =
-        await FirebaseFirestore.instance
-            .collection('teams')
-            .where('code', isEqualTo: code)
-            .limit(1)
-            .get();
+    final query = await FirebaseFirestore.instance
+        .collection('teams')
+        .where('code', isEqualTo: code)
+        .limit(1)
+        .get();
 
     if (query.docs.isNotEmpty) {
       final doc = query.docs.first;
+      final ownerId = doc['createdBy'];
+      final ownerSnap = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(ownerId)
+          .get();
+      ownerName = ownerSnap['username'];
+
       setState(() {
         matchedTeamId = doc.id;
         teamName = doc['name'];
         teamDescription = doc['description'];
-        ownerName = doc['createdBy'];
+        
       });
     } else {
       setState(() {
@@ -56,12 +64,32 @@ class _JoinTeamPageState extends ConsumerState<JoinTeamPage> {
       final teamRef = FirebaseFirestore.instance
           .collection('teams')
           .doc(matchedTeamId);
-      await teamRef.update({
-        'members': FieldValue.arrayUnion([user.uid]),
-      });
+
+      final teamSnapshot = await teamRef.get();
+
+      if (teamSnapshot.exists) {
+        final teamData = teamSnapshot.data();
+        final teamCode = teamData?['code'];
+
+        final userRef = FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid);
+
+        await teamRef.update({
+          'members': FieldValue.arrayUnion([user.uid]),
+        });
+
+        await userRef.update({
+          'joinedTeams': FieldValue.arrayUnion([teamCode]),
+        });
+
+        ref.invalidate(userTeamsStreamProvider);
+      } else {
+        print('Team not found');
+      }
 
       ref.read(currentGroupIdProvider.notifier).state = matchedTeamId;
-      Navigator.pushNamed(context, '/tasks');
+      Navigator.pop(context);
     }
   }
 
