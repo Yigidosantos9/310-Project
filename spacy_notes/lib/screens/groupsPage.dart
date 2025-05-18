@@ -1,143 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:spacy_notes/CustomWidgets/customAppBar.dart';
 import 'package:spacy_notes/CustomWidgets/customText.dart';
 import 'package:spacy_notes/core/constants/color_constants.dart';
-import 'package:spacy_notes/CustomWidgets/customAppBar.dart';
+import 'package:spacy_notes/models/team_model.dart';
+import 'package:spacy_notes/providers/team_provider.dart';
 import 'package:spacy_notes/screens/coursesPage.dart';
 
-class GroupsPage extends StatefulWidget {
+class GroupsPage extends ConsumerWidget {
   const GroupsPage({super.key});
 
   @override
-  State<GroupsPage> createState() => _GroupsPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncTeams = ref.watch(userTeamsStreamProvider);
 
-class _GroupsPageState extends State<GroupsPage> {
-  List<String> groups = [];
-
-  void _addGroup() {
-    int nextNumber = groups.length + 1;
-
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("Add New Group"),
-            content: const Text(
-              "Do you want to set a custom name for this group?",
-            ),
-            actions: [
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    groups.add("Group $nextNumber");
-                  });
-                  Navigator.pop(context);
-                },
-                child: const Text("No", style: TextStyle(color: Colors.white)),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _askCustomName(nextNumber);
-                },
-                child: const Text("Yes", style: TextStyle(color: Colors.white)),
-              ),
-            ],
-          ),
-    );
-  }
-
-  void _askCustomName(int groupNumber) {
-    String customName = '';
-
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("Custom Group Name"),
-            content: TextField(
-              autofocus: true,
-              decoration: const InputDecoration(
-                labelText: "Group name",
-                hintText: "e.g. My Study Team",
-              ),
-              onChanged: (value) {
-                customName = value.trim();
-              },
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  "Cancel",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    groups.add(
-                      customName.isEmpty ? "Group $groupNumber" : customName,
-                    );
-                  });
-                  Navigator.pop(context);
-                },
-                child: const Text("Add", style: TextStyle(color: Colors.white)),
-              ),
-            ],
-          ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: CustomAppBar(
         title: 'GROUPS',
         onPressed: () => Navigator.pushReplacementNamed(context, '/profile'),
       ),
-
-      body: ListView.builder(
-        padding: const EdgeInsets.all(12),
-        itemCount: groups.length + 1,
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return _buildTile("You", Colors.orange, Colors.pink[100]!, index);
-          } else {
-            return _buildTile(
-              groups[index - 1],
-              Colors.purple,
-              Colors.purple[200]!,
-              index,
+      body: asyncTeams.when(
+        data: (teams) {
+          if (teams.isEmpty) {
+            return const Center(
+              child: Text(
+                "No groups joined yet!",
+                style: TextStyle(color: Colors.white),
+              ),
             );
           }
+          return ListView.builder(
+            padding: const EdgeInsets.all(12),
+            itemCount: teams.length,
+            itemBuilder: (context, index) {
+              final team = teams[index];
+              return _buildTile(context, team);
+            },
+          );
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.purple,
-        onPressed: _addGroup,
-        child: const Icon(Icons.add, color: Colors.white),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error:
+            (e, _) => Center(
+              child: Text(
+                'Error: $e',
+                style: const TextStyle(color: Colors.red),
+              ),
+            ),
       ),
     );
   }
 
-  Widget _buildTile(String name, Color tileColor, Color boxColor, int index) {
+  Widget _buildTile(BuildContext context, TeamModel team) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
       decoration: BoxDecoration(
-        color: tileColor,
+        color: Colors.purple,
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
         onTap: () {
-          Navigator.pushNamed(context, '/courses');
+          Navigator.pushNamed(context, '/courses', arguments: team.id);
         },
+
         leading: Container(
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: boxColor,
+            color: Colors.purple[200],
             border: Border.all(color: Colors.black),
             boxShadow: const [
               BoxShadow(color: Colors.black38, offset: Offset(2, 2)),
@@ -145,21 +75,10 @@ class _GroupsPageState extends State<GroupsPage> {
           ),
         ),
         title: CustomText(
-          text: name,
+          text: team.name,
           fontWeight: FontWeight.bold,
           color: AppColors.unselectedTaskColor,
         ),
-        trailing:
-            index == 0
-                ? null
-                : IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.black),
-                  onPressed: () {
-                    setState(() {
-                      groups.removeAt(index - 1);
-                    });
-                  },
-                ),
       ),
     );
   }

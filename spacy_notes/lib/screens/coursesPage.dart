@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spacy_notes/CustomWidgets/customText.dart';
 import 'package:spacy_notes/core/constants/color_constants.dart';
-import 'package:spacy_notes/CustomWidgets/customAppBar.dart';
 import 'dart:math';
+import 'package:tuple/tuple.dart';
+import 'package:spacy_notes/models/courses_model.dart';
+import 'package:spacy_notes/providers/courses_provider.dart';
 
 int getRandomNumberInRange(int min, int max) {
   Random random = Random();
@@ -18,43 +21,94 @@ Color getRandomColor() {
   return hslColor.toColor();
 }
 
-class CoursesPage extends StatefulWidget {
+class CoursesPage extends ConsumerStatefulWidget {
   const CoursesPage({super.key});
 
   @override
-  State<CoursesPage> createState() => _CoursesPageState();
+  ConsumerState<CoursesPage> createState() => _CoursesPageState();
 }
 
-class _CoursesPageState extends State<CoursesPage> {
-  final List<Map<String, dynamic>> planets = [];
+class _CoursesPageState extends ConsumerState<CoursesPage> {
+  String? teamId;
+
   final TextEditingController _textController = TextEditingController();
+
+  final double canvasSize = 1000;
+  final double margin = 100;
+  final double padding = 20.0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is String) {
+      teamId = args;
+    } else {
+      teamId = '';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final userId = 'your-user-id';
+    final courseAsyncValue = ref.watch(courseListProvider(teamId!));
+
     return Scaffold(
-      appBar: CustomAppBar(title: 'Courses'),
+      appBar: AppBar(title: const Text('Courses')),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addNewPlanet,
+        onPressed: _addNewCourse,
         backgroundColor: AppColors.mainButtonColor,
         child: Icon(Icons.add, color: AppColors.iconColor),
       ),
       backgroundColor: AppColors.background,
-      body: Stack(
-        children: [
-          InteractiveViewer(
-            maxScale: 5.0,
-            minScale: 0.5,
-            boundaryMargin: const EdgeInsets.all(double.infinity),
-            child: Center(
-              child: Container(
-                width: 2000, // a big but finite space
-                height: 2000,
-                color: Colors.transparent,
-                child: Stack(children: _buildPlanets()),
+      body: courseAsyncValue.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text('Error: $error')),
+        data: (courses) {
+          return Stack(
+            children: [
+              Positioned.fill(
+                child: CustomPaint(painter: StarFieldPainter(starCount: 150)),
               ),
-            ),
-          ),
-        ],
+              InteractiveViewer(
+                constrained: false,
+                maxScale: 5.0,
+                minScale: 0.5,
+                boundaryMargin: const EdgeInsets.all(double.infinity),
+                child: Center(
+                  child: SizedBox(
+                    width: canvasSize,
+                    height: canvasSize,
+                    child: Stack(
+                      children:
+                          courses.map((course) {
+                            final double top =
+                                getRandomNumberInRange(100, 800).toDouble();
+                            final double left =
+                                getRandomNumberInRange(100, 800).toDouble();
+                            final double size =
+                                getRandomNumberInRange(60, 120).toDouble();
+                            final color = getRandomColor();
+
+                            return Positioned(
+                              top: top,
+                              left: left,
+                              child: PlanetWidget(
+                                color: color,
+                                size: size,
+                                inputText: course.name,
+                                courseId: course.id,
+                                teamId: teamId!,
+                              ),
+                            );
+                          }).toList(),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -74,24 +128,15 @@ class _CoursesPageState extends State<CoursesPage> {
               controller: _textController,
               decoration: InputDecoration(
                 hintText: "Planet name...",
-                hintStyle: TextStyle(
-                  color: AppColors.darkSubTextColor,
-                ), // Color for the hint text
+                hintStyle: TextStyle(color: AppColors.darkSubTextColor),
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    color: AppColors.secondaryButtonColor,
-                  ), // Border color when not focused
+                  borderSide: BorderSide(color: AppColors.secondaryButtonColor),
                 ),
                 focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    color: AppColors.mainButtonColor,
-                  ), // Border color when focused
+                  borderSide: BorderSide(color: AppColors.mainButtonColor),
                 ),
               ),
-              autofocus: false,
-              style: TextStyle(
-                color: AppColors.mainButtonColor,
-              ), // Color for the typed text
+              style: TextStyle(color: AppColors.mainButtonColor),
             ),
             actions: [
               TextButton(
@@ -113,55 +158,17 @@ class _CoursesPageState extends State<CoursesPage> {
     );
   }
 
-  void _addNewPlanet() async {
-    String? inputText = await _showTextInputDialog();
+  void _addNewCourse() async {
+    final String? inputText = await _showTextInputDialog();
     if (inputText == null || inputText.trim().isEmpty) return;
 
-    const double padding = 20.0;
-    const int maxAttempts = 50;
+    final userId = 'your-user-id';
+    final addCourse = ref.read(addCourseProvider);
+    final newCourse = Course(id: UniqueKey().toString(), name: inputText);
 
-    for (int attempt = 0; attempt < maxAttempts; attempt++) {
-      double newTop = getRandomNumberInRange(20, 100).toDouble();
-      double newLeft = getRandomNumberInRange(20, 100).toDouble();
-      double newSize = getRandomNumberInRange(20, 100).toDouble();
+    await addCourse(teamId!, newCourse);
 
-      bool overlaps = planets.any((planet) {
-        double dx = newLeft - planet['left'];
-        double dy = newTop - planet['top'];
-        double distance = sqrt(dx * dx + dy * dy);
-        double minAllowedDistance = (newSize + planet['size']) / 2 + padding;
-        return distance < minAllowedDistance;
-      });
-
-      if (!overlaps) {
-        setState(() {
-          planets.add({
-            "color": getRandomColor(),
-            "top": newTop,
-            "left": newLeft,
-            "size": newSize,
-            "text": inputText,
-          });
-        });
-        break;
-      }
-    }
-  }
-
-  List<Widget> _buildPlanets() {
-    return planets
-        .map(
-          (planet) => Positioned(
-            top: planet["top"],
-            left: planet["left"],
-            child: PlanetWidget(
-              color: planet["color"],
-              size: planet["size"],
-              inputText: planet["text"],
-            ),
-          ),
-        )
-        .toList();
+    ref.invalidate(courseListProvider(teamId!));
   }
 }
 
@@ -169,12 +176,16 @@ class PlanetWidget extends StatelessWidget {
   final Color color;
   final double size;
   final String inputText;
+  final String courseId;
+  final String teamId;
 
   const PlanetWidget({
     super.key,
     required this.color,
     required this.size,
     required this.inputText,
+    required this.courseId,
+    required this.teamId,
   });
 
   @override
@@ -201,7 +212,11 @@ class PlanetWidget extends StatelessWidget {
             ),
             child: TextButton(
               onPressed: () {
-                Navigator.pushNamed(context, "/notes");
+                Navigator.pushNamed(
+                  context,
+                  "/notes",
+                  arguments: Tuple2(teamId, courseId),
+                );
               },
               child: FittedBox(
                 child: CustomText(text: inputText, fontSize: 37),
@@ -212,4 +227,26 @@ class PlanetWidget extends StatelessWidget {
       ),
     );
   }
+}
+
+class StarFieldPainter extends CustomPainter {
+  final int starCount;
+  final Random _random = Random();
+
+  StarFieldPainter({this.starCount = 100});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.white.withOpacity(0.2);
+
+    for (int i = 0; i < starCount; i++) {
+      final dx = _random.nextDouble() * size.width;
+      final dy = _random.nextDouble() * size.height;
+      final radius = _random.nextDouble() * 1.5 + 0.5;
+      canvas.drawCircle(Offset(dx, dy), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
