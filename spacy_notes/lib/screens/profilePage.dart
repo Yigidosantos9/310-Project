@@ -48,7 +48,6 @@ class ProfilePage extends ConsumerWidget {
           backgroundColor: AppColors.background,
           appBar: CustomAppBar(
             title: 'Profile',
-            subTitle: 'Notes',
             leading: IconButton(
               icon: const Icon(Icons.close, color: Colors.white),
               onPressed: () async {
