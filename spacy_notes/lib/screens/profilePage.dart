@@ -57,8 +57,10 @@ class ProfilePage extends ConsumerWidget {
               },
             ),
             rhs: IconButton(
-              icon: const Icon(Icons.settings, color: Colors.white),
-              onPressed: () {},
+              icon: const Icon(Icons.shopping_cart, color: Colors.white),
+              onPressed: () {
+                Navigator.pushNamed(context, '/market');
+              },
             ),
           ),
           bottomNavigationBar: Theme(
@@ -67,7 +69,7 @@ class ProfilePage extends ConsumerWidget {
               highlightColor: Colors.transparent,
             ),
             child: BottomNavigationBar(
-              currentIndex: 2,
+              currentIndex: 1,
               backgroundColor: const Color.fromARGB(255, 17, 1, 37),
               selectedItemColor: AppColors.onSecondary,
               unselectedItemColor: AppColors.onPrimary.withOpacity(0.6),
@@ -79,11 +81,7 @@ class ProfilePage extends ConsumerWidget {
                   activeIcon: Icon(Icons.article),
                   label: 'Notes',
                 ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.add_circle_outline),
-                  activeIcon: Icon(Icons.add_circle),
-                  label: 'New Note',
-                ),
+
                 BottomNavigationBarItem(
                   icon: Icon(Icons.person_outline),
                   activeIcon: Icon(Icons.person),
@@ -94,26 +92,16 @@ class ProfilePage extends ConsumerWidget {
                   activeIcon: Icon(Icons.access_time_filled),
                   label: 'Focus',
                 ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.shopping_cart_outlined),
-                  activeIcon: Icon(Icons.shopping_cart),
-                  label: 'Market',
-                ),
               ],
               onTap: (index) {
-                if (index == 2) return;
+                if (index == 1) return;
                 switch (index) {
                   case 0:
                     Navigator.pushNamed(context, '/groups');
                     break;
-                  case 1:
-                    Navigator.pushNamed(context, '/note');
-                    break;
-                  case 3:
+
+                  case 2:
                     Navigator.pushNamed(context, '/pomodoro');
-                    break;
-                  case 4:
-                    Navigator.pushNamed(context, '/market');
                     break;
                 }
               },
