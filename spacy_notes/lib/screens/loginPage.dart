@@ -79,6 +79,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   'canChangeDescName': false,
                   'canChangeIcon': false,
                   'canBeJoined': false,
+                  'canOnlyMyself': true,
                 },
               });
 

@@ -80,6 +80,14 @@ class _DescriptionCard extends StatelessWidget {
               fontFamily: "jersey",
               textAlign: TextAlign.center,
             ),
+            if (!(team.settings['canOnlyMyself'] == true))
+              CustomText(
+                text: "Team Code: ${team.code}",
+                color: AppColors.onPrimary,
+                fontSize: 16,
+                fontFamily: "jersey",
+                textAlign: TextAlign.center,
+              ),
           ],
         ),
       ),
@@ -92,10 +100,13 @@ class MembersSection extends StatelessWidget {
   const MembersSection({super.key, required this.team});
 
   Future<List<String>> _getUsernames(List<String> uids) async {
-    return await Future.wait(uids.map((uid) async {
-      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
-      return doc.data()?['username'] ?? 'Unknown';
-    }));
+    return await Future.wait(
+      uids.map((uid) async {
+        final doc =
+            await FirebaseFirestore.instance.collection('users').doc(uid).get();
+        return doc.data()?['username'] ?? 'Unknown';
+      }),
+    );
   }
 
   @override
@@ -121,21 +132,24 @@ class MembersSection extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               itemCount: usernames.length,
               separatorBuilder: (_, __) => const SizedBox(width: 16),
-              itemBuilder: (context, i) => Column(
-                children: [
-                  const CircleAvatar(
-                    radius: 30,
-                    backgroundImage: AssetImage('assets/images/astronaut.png'),
+              itemBuilder:
+                  (context, i) => Column(
+                    children: [
+                      const CircleAvatar(
+                        radius: 30,
+                        backgroundImage: AssetImage(
+                          'assets/images/astronaut.png',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      CustomText(
+                        text: usernames[i],
+                        fontSize: 16,
+                        color: AppColors.onSecondary,
+                        fontFamily: "jersey",
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  CustomText(
-                    text: usernames[i],
-                    fontSize: 16,
-                    color: AppColors.onSecondary,
-                    fontFamily: "jersey",
-                  ),
-                ],
-              ),
             ),
           ),
         );
@@ -143,7 +157,6 @@ class MembersSection extends StatelessWidget {
     );
   }
 }
-
 
 class TasksSection extends ConsumerStatefulWidget {
   final TeamModel team;
@@ -181,7 +194,9 @@ class _TasksSectionState extends ConsumerState<TasksSection> {
                     fontSize: 16,
                   ),
                   onTap: () {
-                    Navigator.of(context).pushNamed('/tasks', arguments: widget.team);
+                    Navigator.of(
+                      context,
+                    ).pushNamed('/tasks', arguments: widget.team);
                   },
                 ),
               ],
@@ -189,11 +204,12 @@ class _TasksSectionState extends ConsumerState<TasksSection> {
           ),
           const SizedBox(height: 16),
           StreamBuilder(
-            stream: FirebaseFirestore.instance
-                .collection('tasks')
-                .where('groupId', isEqualTo: widget.team.id)
-                .orderBy('createdAt', descending: true)
-                .snapshots(),
+            stream:
+                FirebaseFirestore.instance
+                    .collection('tasks')
+                    .where('groupId', isEqualTo: widget.team.id)
+                    .orderBy('createdAt', descending: true)
+                    .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -210,12 +226,19 @@ class _TasksSectionState extends ConsumerState<TasksSection> {
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.of(context).pushNamed('/tasks', arguments: widget.team);
+                        Navigator.of(
+                          context,
+                        ).pushNamed('/tasks', arguments: widget.team);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.mainButtonColor,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       child: const CustomText(
                         text: "Create Task",
@@ -229,50 +252,78 @@ class _TasksSectionState extends ConsumerState<TasksSection> {
               }
 
               final docs = snapshot.data!.docs;
-              final tasks = docs.take(4).map((doc) =>
-                  TaskModel.fromFirestore(doc.id, doc.data() as Map<String, dynamic>)).toList();
+              final tasks =
+                  docs
+                      .take(4)
+                      .map(
+                        (doc) => TaskModel.fromFirestore(
+                          doc.id,
+                          doc.data() as Map<String, dynamic>,
+                        ),
+                      )
+                      .toList();
 
               return Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
-                  side: BorderSide(color: AppColors.mainButtonColor.withOpacity(0.5)),
+                  side: BorderSide(
+                    color: AppColors.mainButtonColor.withOpacity(0.5),
+                  ),
                 ),
                 color: const Color.fromARGB(255, 17, 1, 37).withOpacity(0.1),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
-                    children: tasks.map((task) => Padding(
-                      padding: const EdgeInsets.all(4),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.grayTextColor.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.mainButtonColor.withOpacity(0.5), width: 2),
-                        ),
-                        child: Row(
-                          children: [
-                            Checkbox(
-                              value: task.isCompleted,
-                              onChanged: (_) async {
-                                await taskController.toggleCompleted(task);
-                              },
-                              activeColor: AppColors.mainButtonColor.withOpacity(0.5),
-                              checkColor: AppColors.background,
-                              side: BorderSide(color: AppColors.mainButtonColor.withOpacity(0.5), width: 2),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: CustomText(
-                                text: task.title,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.onSecondary,
+                    children:
+                        tasks
+                            .map(
+                              (task) => Padding(
+                                padding: const EdgeInsets.all(4),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: AppColors.grayTextColor.withOpacity(
+                                      0.2,
+                                    ),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: AppColors.mainButtonColor
+                                          .withOpacity(0.5),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Checkbox(
+                                        value: task.isCompleted,
+                                        onChanged: (_) async {
+                                          await taskController.toggleCompleted(
+                                            task,
+                                          );
+                                        },
+                                        activeColor: AppColors.mainButtonColor
+                                            .withOpacity(0.5),
+                                        checkColor: AppColors.background,
+                                        side: BorderSide(
+                                          color: AppColors.mainButtonColor
+                                              .withOpacity(0.5),
+                                          width: 2,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: CustomText(
+                                          text: task.title,
+                                          fontWeight: FontWeight.w500,
+                                          color: AppColors.onSecondary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )).toList(),
+                            )
+                            .toList(),
                   ),
                 ),
               );
@@ -283,8 +334,6 @@ class _TasksSectionState extends ConsumerState<TasksSection> {
     );
   }
 }
-
-
 
 class _SettingsSection extends StatefulWidget {
   final Map<String, bool> settings;

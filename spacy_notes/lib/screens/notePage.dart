@@ -64,12 +64,13 @@ class _NotePageState extends State<NotePage> {
       final newNoteRef = notesRef.doc(); // otomatik ID oluşturur
       await newNoteRef.set({
         'content': content,
-        'createdBy': 'currentUserId', // burada auth ile gelen kullanıcıyı koymalısın
+        'createdBy':
+            'currentUserId', // burada auth ile gelen kullanıcıyı koymalısın
         'createdAt': Timestamp.now(),
       });
     }
 
-    Navigator.of(context).popUntil(ModalRoute.withName('/profile'));
+    Navigator.pop(context);
   }
 
   @override
@@ -77,16 +78,16 @@ class _NotePageState extends State<NotePage> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: const CustomAppBar(
-          title: "Note",
-          subTitle: "Page",
-        ),
+        appBar: const CustomAppBar(title: "Note", subTitle: "Page"),
         body: Column(
           children: [
             // Yazı Alanı
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
                 child: Container(
                   decoration: BoxDecoration(
                     color: AppColors.selectedTaskColor.withOpacity(0.1),
@@ -126,7 +127,7 @@ class _NotePageState extends State<NotePage> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.of(context).popUntil(ModalRoute.withName('/profile'));
+                        Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.mainButtonColor,
