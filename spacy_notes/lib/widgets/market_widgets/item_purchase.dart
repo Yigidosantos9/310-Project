@@ -99,7 +99,11 @@ class PurchaseDialog extends StatelessWidget {
                 const SizedBox(height: 20),
                 Row(
                   children: [
-                    Image.asset('images/currency.png', width: 28, height: 28),
+                    Image.asset(
+                      'assets/images/currency.png',
+                      width: 28,
+                      height: 28,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       '${itemPrice}',

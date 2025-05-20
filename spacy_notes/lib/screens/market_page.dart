@@ -117,12 +117,13 @@ class _MarketPageState extends ConsumerState<MarketPage> {
             padding: const EdgeInsets.only(right: 12),
             child: Row(
               children: [
-                Image.asset('images/currency.png', width: 24, height: 24),
-                const SizedBox(width: 4),
-                Text(
-                  '$balance',
-                  style: const TextStyle(color: Colors.white),
+                Image.asset(
+                  'assets/images/currency.png',
+                  width: 28,
+                  height: 28,
                 ),
+                const SizedBox(width: 4),
+                Text('$balance', style: const TextStyle(color: Colors.white)),
               ],
             ),
           ),
