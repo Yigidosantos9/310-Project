@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spacy_notes/CustomWidgets/customText.dart';
 import 'package:spacy_notes/core/constants/color_constants.dart';
 import 'dart:math';
+import 'package:spacy_notes/CustomWidgets/customAppBar.dart';
 import 'package:tuple/tuple.dart';
 import 'package:spacy_notes/models/courses_model.dart';
 import 'package:spacy_notes/providers/courses_provider.dart';
@@ -54,7 +55,7 @@ class _CoursesPageState extends ConsumerState<CoursesPage> {
     final courseAsyncValue = ref.watch(courseListProvider(teamId!));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Courses')),
+      appBar: const CustomAppBar(title: "Courses", subTitle: 'Page'),
       floatingActionButton: FloatingActionButton(
         onPressed: _addNewCourse,
         backgroundColor: AppColors.mainButtonColor,

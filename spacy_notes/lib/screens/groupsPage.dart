@@ -17,7 +17,8 @@ class GroupsPage extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: CustomAppBar(
-        title: 'GROUPS',
+        title: 'Groups',
+        subTitle: 'Page',
         onPressed: () => Navigator.pushReplacementNamed(context, '/profile'),
       ),
       body: asyncTeams.when(

@@ -17,13 +17,18 @@ final userTeamsStreamProvider = StreamProvider<List<TeamModel>>((ref) {
 
   // Firestore'da "whereIn" maksimum 10 değer alabilir.
   for (var i = 0; i < codes.length; i += 10) {
-    final chunk = codes.sublist(i, i + 10 > codes.length ? codes.length : i + 10);
+    final chunk = codes.sublist(
+      i,
+      i + 10 > codes.length ? codes.length : i + 10,
+    );
 
     final stream = teamsRef
         .where('code', whereIn: chunk)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => TeamModel.fromFirestore(doc)).toList());
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => TeamModel.fromFirestore(doc)).toList(),
+        );
 
     teamStreams.add(stream);
   }
