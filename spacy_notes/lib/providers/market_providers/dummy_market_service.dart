@@ -40,6 +40,7 @@ class DummyMarketService extends MarketDataService {
         gradientColors: [const Color(0xFF3E2723), const Color(0xFF1B1B1B)],
         circleBorderColor: Colors.orange,
         circleFillColor: Colors.orange,
+        price: 300,
       ),
       ColorPalette(
         title: "Neon Rider",
@@ -47,6 +48,7 @@ class DummyMarketService extends MarketDataService {
         gradientColors: [const Color(0xFF7E57C2), const Color(0xFF4527A0)],
         circleBorderColor: Colors.orangeAccent,
         circleFillColor: Colors.orangeAccent,
+        price: 300,
       ),
       ColorPalette(
         title: "Neon Rider",
@@ -57,6 +59,7 @@ class DummyMarketService extends MarketDataService {
         ],
         circleBorderColor: Colors.orangeAccent,
         circleFillColor: Colors.orangeAccent,
+        price: 300,
       ),
       ColorPalette(
         title: "Neon Rider",
@@ -64,6 +67,7 @@ class DummyMarketService extends MarketDataService {
         gradientColors: [const Color(0xFF7E57C2), const Color(0xFF4527A0)],
         circleBorderColor: Colors.orangeAccent,
         circleFillColor: Colors.orangeAccent,
+        price: 300,
       ),
       ColorPalette(
         title: "Neon Rider",
@@ -71,6 +75,7 @@ class DummyMarketService extends MarketDataService {
         gradientColors: [const Color(0xFF7E57C2), const Color(0xFF4527A0)],
         circleBorderColor: Colors.orangeAccent,
         circleFillColor: Colors.orangeAccent,
+        price: 300,
       ),
     ];
   }

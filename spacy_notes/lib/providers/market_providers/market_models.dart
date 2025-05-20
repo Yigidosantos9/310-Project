@@ -24,6 +24,7 @@ class ColorPalette {
   final List<Color> gradientColors;
   final Color circleBorderColor;
   final Color circleFillColor;
+  final int price;
 
   ColorPalette({
     required this.title,
@@ -31,5 +32,6 @@ class ColorPalette {
     required this.gradientColors,
     required this.circleBorderColor,
     required this.circleFillColor,
+    required this.price,
   });
 }

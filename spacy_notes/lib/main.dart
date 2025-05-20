@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spacy_notes/core/constants/color_constants.dart';
+import 'package:spacy_notes/providers/market_providers/dummy_market_to_firebase_service.dart';
 
 // Sayfalar
 import 'screens/splashPage.dart';
@@ -35,8 +36,14 @@ void main() async {
         measurementId: "G-FC4LT924BE",
       ),
     );
+
+    // Upload market values to firestore
+    // await uploadDummyMarketDataToFirebase(); 
   } else {
     await Firebase.initializeApp();
+
+    // await uploadDummyMarketDataToFirebase(); 
+
   }
 
   runApp(const ProviderScope(child: MyApp()));

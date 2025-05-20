@@ -4,6 +4,7 @@ class UserModel {
   final String uid;
   final String username;
   final String email;
+  final int balance;
   final List<String> joinedTeams;
   final int starPoints;
   final int timeWorked;
@@ -11,13 +12,15 @@ class UserModel {
   final DateTime createdAt;
   final int totalTasks;
   final String profilePhoto;
-  final List<String> colorPalettes;
-  final List<String> badges;
+  final List<String> purchasedPalettes;
+  final List<String> purchasedProfiles;
+  final List<String> purchasedPlanets;
 
   UserModel({
     required this.uid,
     required this.username,
     required this.email,
+    required this.balance,
     this.joinedTeams = const [],
     this.starPoints = 0,
     this.timeWorked = 0,
@@ -25,8 +28,9 @@ class UserModel {
     DateTime? createdAt,
     this.profilePhoto = '',
     this.totalTasks = 0,
-    this.colorPalettes = const [],
-    this.badges = const [],
+    required this.purchasedPalettes,
+    required this.purchasedProfiles,
+    required this.purchasedPlanets,
   }) : createdAt = createdAt ?? DateTime.now();
 
   factory UserModel.fromMap(String uid, Map<String, dynamic> data) {
@@ -40,8 +44,10 @@ class UserModel {
       tasksCompleted: data['tasksCompleted'] ?? 0,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       profilePhoto: data['profilePhoto'] ?? '',
-      colorPalettes: List<String>.from(data['colorPalettes'] ?? []),
-      badges: List<String>.from(data['badges'] ?? []),
+      balance: data['balance'] as int? ?? 0,
+      purchasedPalettes: List<String>.from(data['purchasedPalettes'] ?? []),
+      purchasedProfiles: List<String>.from(data['purchasedProfiles'] ?? []),
+      purchasedPlanets: List<String>.from(data['purchasedPlanets'] ?? []),
       totalTasks: data['totalTasks'] ?? 0,
     );
   }
@@ -56,8 +62,10 @@ class UserModel {
       'tasksCompleted': tasksCompleted,
       'createdAt': createdAt,
       'profilePhoto': profilePhoto,
-      'colorPalettes': colorPalettes,
-      'badges': badges,
+      'balance': balance,
+      'purchasedPalettes': purchasedPalettes,
+      'purchasedProfiles': purchasedProfiles,
+      'purchasedPlanets': purchasedPlanets,
       'totalTasks': totalTasks,
     };
   }
@@ -66,14 +74,16 @@ class UserModel {
     String? uid,
     String? username,
     String? email,
+    int? balance,
     List<String>? joinedTeams,
     int? starPoints,
     int? timeWorked,
     int? tasksCompleted,
     DateTime? createdAt,
     String? profilePhoto,
-    List<String>? colorPalettes,
-    List<String>? badges,
+    List<String>? purchasedPalettes,
+    List<String>? purchasedProfiles,
+    List<String>? purchasedPlanets,
     int? totalTasks,
   }) {
     return UserModel(
@@ -86,8 +96,10 @@ class UserModel {
       tasksCompleted: tasksCompleted ?? this.tasksCompleted,
       createdAt: createdAt ?? this.createdAt,
       profilePhoto: profilePhoto ?? this.profilePhoto,
-      colorPalettes: colorPalettes ?? this.colorPalettes,
-      badges: badges ?? this.badges,
+      balance: balance ?? this.balance,
+      purchasedPalettes: purchasedPalettes ?? this.purchasedPalettes,
+      purchasedProfiles: purchasedProfiles ?? this.purchasedProfiles,
+      purchasedPlanets: purchasedPlanets ?? this.purchasedPlanets,
       totalTasks: totalTasks ?? this.totalTasks,
     );
   }

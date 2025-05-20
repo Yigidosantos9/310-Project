@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:spacy_notes/providers/market_providers/market_data_provider.dart';
+import 'package:spacy_notes/providers/market_providers/market_firebase_service.dart';
 import 'package:spacy_notes/providers/user_provider.dart';
 import 'package:spacy_notes/widgets/market_widgets/cut_corner_color_card.dart';
+import 'package:spacy_notes/widgets/market_widgets/item_purchase.dart';
 import 'package:spacy_notes/widgets/market_widgets/planet_card_widget.dart';
 import 'package:spacy_notes/widgets/market_widgets/profile_picture_card.dart';
 
@@ -14,19 +15,34 @@ class MarketPage extends ConsumerStatefulWidget {
 }
 
 class _MarketPageState extends ConsumerState<MarketPage> {
-  final List<String> moreItems = [
-    "Item 1",
-    "Item 2",
-    "Item 3",
-    "Item 4",
-    "Item 5",
-  ];
+  void showPurchaseDialog({
+    required String itemName,
+    required int itemPrice,
+  }) {
+    final userBalance = ref.read(userProvider)?.starPoints ?? 0;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return PurchaseDialog(
+          itemName: itemName,
+          itemPrice: itemPrice,
+          userBalance: userBalance,
+          onBuy: () {
+            // satın alma işlemi burada yapılabilir
+            Navigator.pop(context);
+          },
+          onCancel: () => Navigator.pop(context),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final planetsAsync = ref.watch(planetsProvider);
-    final profilesAsync = ref.watch(profilesProvider);
-    final palettesAsync = ref.watch(palettesProvider);
+    final planetsAsync = ref.watch(firebasePlanetsProvider);
+    final profilesAsync = ref.watch(firebaseProfilesProvider);
+    final palettesAsync = ref.watch(firebasePalettesProvider);
     final user = ref.watch(userProvider);
     final coinAmount = user?.starPoints ?? 0;
 
@@ -58,7 +74,7 @@ class _MarketPageState extends ConsumerState<MarketPage> {
                 WidgetSpan(
                   child: ShaderMask(
                     shaderCallback: (bounds) => const LinearGradient(
-                      colors: [Color.fromARGB(255, 232, 229, 233), Color.fromARGB(255, 255, 255, 255)],
+                      colors: [Color(0xFFE8E5E9), Color(0xFFFFFFFF)],
                     ).createShader(bounds),
                     child: const Text(
                       'Store',
@@ -103,11 +119,16 @@ class _MarketPageState extends ConsumerState<MarketPage> {
                   itemCount: planets.length,
                   itemBuilder: (context, index) {
                     final p = planets[index];
-                    return PlanetCard(
-                      title: p.title,
-                      subTitle: p.subTitle,
-                      imagePath: p.imagePath,
-                      price: p.price,
+                    return GestureDetector(
+                      onTap: () {
+                        showPurchaseDialog(itemName: p.title, itemPrice: int.tryParse(p.price) ?? 0);
+                      },
+                      child: PlanetCard(
+                        title: p.title,
+                        subTitle: p.subTitle,
+                        imagePath: p.imagePath,
+                        price: p.price,
+                      ),
                     );
                   },
                 ),
@@ -127,10 +148,15 @@ class _MarketPageState extends ConsumerState<MarketPage> {
                   itemCount: profiles.length,
                   itemBuilder: (context, index) {
                     final profile = profiles[index];
-                    return ProfilePictureCard(
-                      title: profile.title,
-                      imagePath: profile.imagePath,
-                      price: profile.price,
+                    return GestureDetector(
+                      onTap: () {
+                        showPurchaseDialog(itemName: profile.title, itemPrice: int.tryParse(profile.price) ?? 0);
+                      },
+                      child: ProfilePictureCard(
+                        title: profile.title,
+                        imagePath: profile.imagePath,
+                        price: profile.price,
+                      ),
                     );
                   },
                 ),
@@ -150,17 +176,19 @@ class _MarketPageState extends ConsumerState<MarketPage> {
                   itemCount: palettes.length,
                   itemBuilder: (context, index) {
                     final palette = palettes[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: CutCornerColorCard(
-                        title: palette.title,
-                        subTitle: palette.subTitle,
-                        gradientColors: palette.gradientColors,
-                        circleBorderColor: palette.circleBorderColor,
-                        circleFillColor: palette.circleFillColor,
-                        onInfoPressed: () {
-                          debugPrint("${palette.title} info tapped!");
-                        },
+                    return GestureDetector(
+                      onTap: () {
+                        showPurchaseDialog(itemName: palette.title, itemPrice: palette.price);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: CutCornerColorCard(
+                          title: palette.title,
+                          subTitle: palette.subTitle,
+                          gradientColors: palette.gradientColors,
+                          circleBorderColor: palette.circleBorderColor,
+                          circleFillColor: palette.circleFillColor,
+                        ),
                       ),
                     );
                   },
@@ -168,36 +196,6 @@ class _MarketPageState extends ConsumerState<MarketPage> {
               ),
               loading: () => const CircularProgressIndicator(),
               error: (e, _) => Text('Error: $e', style: const TextStyle(color: Colors.red)),
-            ),
-
-            const SizedBox(height: 24),
-            const Text("More Items", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 150,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: moreItems.length,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {},
-                    child: Container(
-                      width: 150,
-                      margin: const EdgeInsets.only(right: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[800],
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Center(
-                        child: Text(
-                          moreItems[index],
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
             ),
           ],
         ),

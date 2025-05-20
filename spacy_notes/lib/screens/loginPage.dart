@@ -89,6 +89,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             username: username,
             email: email,
             joinedTeams: [teamCode],
+            balance: 1000,
+            purchasedPalettes: [],
+            purchasedProfiles: [],
+            purchasedPlanets: [],
           );
 
           await FirebaseFirestore.instance
